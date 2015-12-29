@@ -98,7 +98,7 @@ class PBox {
 			// Most boxes are dynamic.
 			dynamic = _dynamic;
 			// Store widest/highest/deepest axis for sphere checks.
-			largestaxis = calclargeaxis() * 1.5f;
+			largestaxis = calclargeaxis() * 2.0f;
 			// No rotations from reactions have been applied yet.
 			lastrotaxis = vec3( 0, 0, 0 );
 			lastrotangle = 0.0f;
@@ -264,8 +264,8 @@ class PBox {
 				
 				// If distance is less than sum of max axis', 
 				// we have a potential collision.
-				//if( dist > (largestaxis + box2.largestaxis) )
-				//	return;
+				if( dist > (largestaxis + box2.largestaxis) )
+					return;
 
 			// Distance Check.
 			//////////////////
