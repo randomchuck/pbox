@@ -1,0 +1,107 @@
+# depslib dependency file v1.0
+1451417431 source:c:\softe\pbox\main.cpp
+	<tchar.h>
+	<windows.h>
+	<stdio.h>
+	"PBox.h"
+	"../Boop/Boop3D.h"
+
+1451419007 c:\softe\pbox\pbox.h
+	<math.h>
+	"GLM_Lite.h"
+	"PCollision.h"
+
+1446923234 c:\softe\common_11.18.2015\opengl\ogx\source\glm_lite.h
+
+1451257508 source:d:\programming\pbox\main.cpp
+	<tchar.h>
+	<windows.h>
+	<stdio.h>
+	"PBox.h"
+	"../Boop/Boop3D.h"
+
+1451257782 d:\programming\pbox\pbox.h
+	<math.h>
+	"GLM_Lite.h"
+	"PCollision.h"
+
+1446923234 d:\programming\common_11.18.2015\opengl\ogx\source\glm_lite.h
+
+1446923235 source:d:\programming\common_11.18.2015\opengl\ogx\source\glm_lite.cpp
+	"Glm_Lite.h"
+	<math.h>
+
+1323714892 d:\apps\vs2012\vc\include\math.h
+	<crtdefs.h>
+
+1339465300 d:\apps\vs2012\vc\include\crtdefs.h
+	<sal.h>
+	<vadefs.h>
+	<winapifamily.h>
+
+1340592312 d:\apps\vs2012\vc\include\sal.h
+	"codeanalysis\sourceannotations.h"
+	<ConcurrencySal.h>
+
+1323714894 d:\apps\vs2012\vc\include\codeanalysis\sourceannotations.h
+
+1335151438 d:\apps\vs2012\vc\include\concurrencysal.h
+
+1323714894 d:\apps\vs2012\vc\include\vadefs.h
+
+1446923235 source:c:\softe\common_11.18.2015\opengl\ogx\source\glm_lite.cpp
+	"Glm_Lite.h"
+	<math.h>
+
+1450912194 c:\softe\pbox\pcollision.h
+	"GLM_Lite.h"
+
+1446923234 d:\programming\common_12.16.2015\opengl\ogx\source\glm_lite.h
+
+1450912194 d:\programming\pbox\pcollision.h
+	"GLM_Lite.h"
+
+1446923235 source:d:\programming\common_12.16.2015\opengl\ogx\source\glm_lite.cpp
+	"Glm_Lite.h"
+	<math.h>
+
+1450457252 source:c:\softe\common_12.16.2015\opengl\ogx\source\glm_lite.cpp
+	"Glm_Lite.h"
+	<math.h>
+
+1446923234 c:\softe\common_12.16.2015\opengl\ogx\source\glm_lite.h
+
+1446923234 c:\softe\common_12.18.2015\opengl\ogx\source\glm_lite.h
+
+1450457252 source:c:\softe\common_12.18.2015\opengl\ogx\source\glm_lite.cpp
+	"Glm_Lite.h"
+	<math.h>
+
+1450457252 source:d:\programming\common_12.18.2015\opengl\ogx\source\glm_lite.cpp
+	"Glm_Lite.h"
+	<math.h>
+
+1446923234 d:\programming\common_12.18.2015\opengl\ogx\source\glm_lite.h
+
+1451163696 d:\programming\boop\boop3d.h
+	<windows.h>
+	"GLM_Lite.h"
+	<vector>
+	<string>
+	<math.h>
+
+1451181233 source:d:\programming\boop\boop3d.cpp
+	"Boop3D.h"
+	<stdio.h>
+
+1451331310 source:c:\softe\boop\boop3d.cpp
+	"Boop3D.h"
+	<stdio.h>
+
+1451320047 c:\softe\boop\boop3d.h
+	<windows.h>
+	"GLM_Lite.h"
+	<vector>
+	<string>
+	<math.h>
+
