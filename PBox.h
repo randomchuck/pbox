@@ -689,8 +689,28 @@ class PBox {
 				pboxes[pb].setpos( pboxes[pb].pos + pboxes[pb].vel );
 			}
 
+
+
+
 			// Do collision/reaction for every box.
 			for( int b = 0; b < _numboxes; b++ ) {
+
+				
+				float potdist = _numboxes * pboxes[b].largestaxis;
+
+				bool inhalfspace[100];
+				for( int h = 0; h < _numboxes; h++ )
+					inhalfspace[h] = true;
+
+				for( int bx = b + 1; bx < _numboxes; bx++ ) {
+					if( pboxes[b].pos.x < 0 && pboxes[bx].pos.x < 0 ) {
+						if( pboxes[b].pos.y <  ) {
+
+						}
+					}
+				}
+
+
 				for( int c = b; c < _numboxes - 1; c++ ) {
 					// Check for a collision.
 					pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
