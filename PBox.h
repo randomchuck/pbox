@@ -694,24 +694,22 @@ class PBox {
 
 			// Do collision/reaction for every box.
 			for( int b = 0; b < _numboxes; b++ ) {
-
 				
-				float potdist = _numboxes * pboxes[b].largestaxis;
+				// 0 = close enough.
+				// 1 = outside bounds.
+				int incube[100] = { 0 };
 
-				bool inhalfspace[100];
-				for( int h = 0; h < _numboxes; h++ )
-					inhalfspace[h] = true;
 
 				for( int bx = b + 1; bx < _numboxes; bx++ ) {
-					if( pboxes[b].pos.x < 0 && pboxes[bx].pos.x < 0 ) {
-						if( pboxes[b].pos.y <  ) {
-
-						}
+					if( pboxes[bx].pos.y - pboxes[bx].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis ) {
+						incube[bx] = 1;
 					}
 				}
 
 
 				for( int c = b; c < _numboxes - 1; c++ ) {
+					if( incube[c] == 1 )
+						continue;
 					// Check for a collision.
 					pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
 					// React to this collision.
@@ -729,13 +727,13 @@ class PBox {
 								pboxes[c + 1].reaction( pboxes[c + 1].pc );
 							}
 							else {
-								pboxes[c + 1].applylastrot();
+								// pboxes[c + 1].applylastrot();
 							}
 						}
 
 					} // if( pc.numcolpnts...
 					else {
-						pboxes[b].applylastrot();
+						// pboxes[b].applylastrot();
 					}
 
 				} // for( int c...

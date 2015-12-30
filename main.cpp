@@ -85,7 +85,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 		vec3 vscal( 1, 1, 1 );
 		vec3 vrota( 0, 0, 1 );
 		float vang = 0.0f;
-		const int numboxes = 10;
+		const int numboxes = 100;
 		PBox pboxes[numboxes];
 		for( int bx = 0; bx < numboxes - 1; bx++ ) {
 			pboxes[bx] = PBox( vpos + vec3((bx % 2) * 0.5f,  1 + bx * 1.25f, 0), vsize, vscal, vrota, vang, true );

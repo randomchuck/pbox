@@ -1,12 +1,12 @@
 # depslib dependency file v1.0
-1451420570 source:c:\softe\pbox\main.cpp
+1451516885 source:c:\softe\pbox\main.cpp
 	<tchar.h>
 	<windows.h>
 	<stdio.h>
 	"PBox.h"
 	"../Boop/Boop3D.h"
 
-1451430174 c:\softe\pbox\pbox.h
+1451517208 c:\softe\pbox\pbox.h
 	<math.h>
 	"GLM_Lite.h"
 	"PCollision.h"
@@ -94,7 +94,7 @@
 	"Boop3D.h"
 	<stdio.h>
 
-1451427804 source:c:\softe\boop\boop3d.cpp
+1451427883 source:c:\softe\boop\boop3d.cpp
 	"Boop3D.h"
 	<stdio.h>
 
