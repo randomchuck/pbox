@@ -27,6 +27,9 @@
 // Holds info about our PBox collisions.
 #include "PCollision.h"
 
+// Octree to improve collision detection performance.
+#include "SpocTree.h"
+
 // Useful for determining if certain functions passed/failed.
 vec3 BADVECTOR( -1000.0f, -1000.0f, -1000.0f );
 
@@ -694,22 +697,27 @@ class PBox {
 
 			// Do collision/reaction for every box.
 			for( int b = 0; b < _numboxes; b++ ) {
-				
-				// 0 = close enough.
-				// 1 = outside bounds.
-				int incube[100] = { 0 };
-
-
-				for( int bx = b + 1; bx < _numboxes; bx++ ) {
-					if( pboxes[bx].pos.y - pboxes[bx].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis ) {
-						incube[bx] = 1;
-					}
-				}
-
 
 				for( int c = b; c < _numboxes - 1; c++ ) {
-					if( incube[c] == 1 )
+					// X left.
+					if( pboxes[c + 1].pos.x + pboxes[c + 1].largestaxis < pboxes[b].pos.x - pboxes[b].largestaxis )
 						continue;
+					// X right.
+					if( pboxes[c + 1].pos.x - pboxes[c + 1].largestaxis > pboxes[b].pos.x + pboxes[b].largestaxis )
+						continue;
+					// Y up.
+					if( pboxes[c + 1].pos.y - pboxes[c + 1].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis )
+						continue;
+					// Y down.
+					if( pboxes[c + 1].pos.y + pboxes[c + 1].largestaxis < pboxes[b].pos.y - pboxes[b].largestaxis )
+						continue;
+					// Z forward.
+					if( pboxes[c + 1].pos.z - pboxes[c + 1].largestaxis > pboxes[b].pos.z + pboxes[b].largestaxis )
+						continue;
+					// Z backward.
+					if( pboxes[c + 1].pos.z + pboxes[c + 1].largestaxis < pboxes[b].pos.z - pboxes[b].largestaxis )
+						continue;
+
 					// Check for a collision.
 					pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
 					// React to this collision.
