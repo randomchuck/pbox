@@ -50,6 +50,7 @@
 		<Unit filename="../boop/Boop3D.h" />
 		<Unit filename="PBox.h" />
 		<Unit filename="PCollision.h" />
+		<Unit filename="SpocTree.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
