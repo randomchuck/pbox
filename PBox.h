@@ -692,31 +692,28 @@ class PBox {
 				pboxes[pb].setpos( pboxes[pb].pos + pboxes[pb].vel );
 			}
 
-
-
-
 			// Do collision/reaction for every box.
 			for( int b = 0; b < _numboxes; b++ ) {
 
 				for( int c = b; c < _numboxes - 1; c++ ) {
-					// X left.
-					if( pboxes[c + 1].pos.x + pboxes[c + 1].largestaxis < pboxes[b].pos.x - pboxes[b].largestaxis )
-						continue;
-					// X right.
-					if( pboxes[c + 1].pos.x - pboxes[c + 1].largestaxis > pboxes[b].pos.x + pboxes[b].largestaxis )
-						continue;
-					// Y up.
-					if( pboxes[c + 1].pos.y - pboxes[c + 1].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis )
-						continue;
-					// Y down.
-					if( pboxes[c + 1].pos.y + pboxes[c + 1].largestaxis < pboxes[b].pos.y - pboxes[b].largestaxis )
-						continue;
-					// Z forward.
-					if( pboxes[c + 1].pos.z - pboxes[c + 1].largestaxis > pboxes[b].pos.z + pboxes[b].largestaxis )
-						continue;
-					// Z backward.
-					if( pboxes[c + 1].pos.z + pboxes[c + 1].largestaxis < pboxes[b].pos.z - pboxes[b].largestaxis )
-						continue;
+				//	// X left.
+				//	if( pboxes[c + 1].pos.x + pboxes[c + 1].largestaxis < pboxes[b].pos.x - pboxes[b].largestaxis )
+				//		continue;
+				//	// X right.
+				//	if( pboxes[c + 1].pos.x - pboxes[c + 1].largestaxis > pboxes[b].pos.x + pboxes[b].largestaxis )
+				//		continue;
+				//	// Y up.
+				//	if( pboxes[c + 1].pos.y - pboxes[c + 1].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis )
+				//		continue;
+				//	// Y down.
+				//	if( pboxes[c + 1].pos.y + pboxes[c + 1].largestaxis < pboxes[b].pos.y - pboxes[b].largestaxis )
+				//		continue;
+				//	// Z forward.
+				//	if( pboxes[c + 1].pos.z - pboxes[c + 1].largestaxis > pboxes[b].pos.z + pboxes[b].largestaxis )
+				//		continue;
+				//	// Z backward.
+				//	if( pboxes[c + 1].pos.z + pboxes[c + 1].largestaxis < pboxes[b].pos.z - pboxes[b].largestaxis )
+				//		continue;
 
 					// Check for a collision.
 					pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );

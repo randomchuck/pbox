@@ -8,6 +8,7 @@
 
 // Lists of things.
 #include <vector>
+#include <list>
 // vectors and such.
 #include "Glm_Lite.h"
 
@@ -33,9 +34,13 @@ struct Sfear {
 // Similar to Sfears, it has an upper and lower 
 // limit in world coordinates.
 struct Spocket {
+	// One node up in the hierarchy.
+	Spocket *sparent;
 	// Upper and lower limits to volume.
 	vec3 poslm;
 	vec3 neglm;
+	// Indices into sphere list.
+	std::vector <int> sindices;
 	// Children of this object.
 	// If looking down at the volume(-Y), children order is clockwise:
 	// childs[0] = UpperLeft/HighY, childs[1] = UpperRight/HighY, 
@@ -57,11 +62,8 @@ class SpocTree {
 
 		// Sfear(Sphere) list.
 		std::vector <Sfear> slist;
-		
-		// Root of octree.
-		Spocket sproot;
 
-		// List of buckets.
+		// List of buckets. Root is the first element.
 		std::vector <Spocket> bucketlist;
 
 		///////////////////////////////////////////////////////////////////////
@@ -86,7 +88,8 @@ class SpocTree {
 
 		///////////////////////////////////////////////////////////////////////
 		// After addsphere()-ing a bunch of spheres, call buildtree()
-		// to create the octree.
+		// to create the octree. You should only need to call this once during 
+		// initialization.
 		// 
 		// _depth determines how many times we split up the tree.
 		// Can improve/degrade performance.
@@ -105,6 +108,53 @@ class SpocTree {
 		void buildtree( const int _depth = 1, 
 						const vec3 &_size = vec3(100, 100, 100),  
 						const vec3 &_pos = vec3(0, 0, 0) ) {
-			
-		}
+			// Make sure user didn't pass something less than 0.
+			if( _depth < 0 ) return;
+
+			// Clear the bucket list.
+			bucketlist.clear();
+
+			// Create new root.
+			bucketlist.push_back( Spocket() );
+
+			// Set bounds of root.
+			bucketlist[0].poslm = vec3( _size ) + _pos;
+			bucketlist[0].neglm = bucketlist[0].poslm * -1 + _pos;
+
+			// If depth is 0, add indices to root and return.
+			if( _depth == 0 ) {
+				for( int s = 0; s < slist.size(); s++ )
+					bucketlist[0].sindices.push_back( s );
+				return;
+			}
+		
+					//spkparent = (i == 0) ? templist[templist.size() - 1] : spkparent;
+					//bucketlist.push_back( Spocket() );
+					//const int bksize = bucketlist.size() - 1;
+					//bucketlist[ bksize ].poslm = vec3( spkparent->poslm / 2 );
+					//bucketlist[ bksize ].neglm = vec3( spkparent->neglm / 2 );
+					//bucketlist[ bksize ].sindices.push_back( 0 );
+					//bucketlist[ bksize ].childs[0] = 0;
+			// Depth is 1 or greater. We will continue to add 
+			// children until we hit the max depth.
+			const int maxnodes = pow( 8, _depth );
+			int curnodes = 1;
+			std::list <Spocket> tempqueue;
+			tempqueue.push_back( bucketlist[0] );
+			Spocket *spkparent = 0;
+			while( curNodes >= maxnodes ) {
+				if( curnodes > 1 ) {
+					bucketlist.push_back( tempqueue.front() );
+					tempqueue.pop_front();
+
+				}
+				tempqueue.push_back( Spocket() );
+				tempqueue[ tempqueue.size() - 1 ].sparent = 
+				tempqueue[ tempqueue.size() - 1 ].poslm = vec3(  );
+				tempqueue[ tempqueue.size() - 1 ].neglm = vec3(  );
+
+				curNodes += 8;
+			}
+
+		} // buildtree()
 };
