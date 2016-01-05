@@ -128,32 +128,60 @@ class SpocTree {
 				return;
 			}
 		
-					//spkparent = (i == 0) ? templist[templist.size() - 1] : spkparent;
-					//bucketlist.push_back( Spocket() );
-					//const int bksize = bucketlist.size() - 1;
-					//bucketlist[ bksize ].poslm = vec3( spkparent->poslm / 2 );
-					//bucketlist[ bksize ].neglm = vec3( spkparent->neglm / 2 );
-					//bucketlist[ bksize ].sindices.push_back( 0 );
-					//bucketlist[ bksize ].childs[0] = 0;
 			// Depth is 1 or greater. We will continue to add 
 			// children until we hit the max depth.
-			const int maxnodes = pow( 8, _depth );
-			int curnodes = 1;
+			// Max number of nodes we create + root.
+			const int maxnodes = pow( 8, _depth ) + 1;
+			// The number of nodes we've created so far.
+			// About to add root.
+			int numnodes = 1;
+			// Queue for unprocessed buckets.
+			// Put head of bucket list into queue.
 			std::list <Spocket> tempqueue;
 			tempqueue.push_back( bucketlist[0] );
-			Spocket *spkparent = 0;
-			while( curNodes >= maxnodes ) {
-				if( curnodes > 1 ) {
-					bucketlist.push_back( tempqueue.front() );
-					tempqueue.pop_front();
+			// This is used to track parent nodes for 
+			// children.
+			Spocket *sp = 0;
 
+			// If there are nodes in the queue, continue to process 
+			// them. Queue will get smaller as nodes are 
+			// moved from the queue to our bucket list.
+			while( tempqueue.size() ) {
+
+				// 
+				bucketlist.push_back( tempqueue.front() );
+				tempqueue.pop_front();
+				sp = &bucketlist.back();
+
+				// 
+				for( int c = 0; c < 8 && numnodes < maxnodes; c++ ) {
+					// Child node length.
+					vec3 clen = ((sp->poslm - sp->neglm) / 2);
+					// Parent origin. Later calculated to 
+					// child origin.
+					vec3 opos = sp->neglm + clen;
+					// Axis lengths.
+					vec3 xvec = clen * vec3( 0.5f, 0, 0 );
+					vec3 yvec = clen * vec3( 0, 0.5f, 0 );
+					vec3 zvec = clen * vec3( 0, 0, 0.5f );
+					// Adjust child origin.
+					// Need a different(but particular) one for all eight.
+					// Top childs.
+					if( c == 0 ) opos = opos - xvec + yvec + zvec;
+					if( c == 1 ) opos = opos + xvec + yvec + zvec;
+					if( c == 2 ) opos = opos + xvec + yvec - zvec;
+					if( c == 3 ) opos = opos - xvec + yvec - zvec;
+					// Bottom childs.
+					if( c == 4 ) opos = opos - xvec - yvec + zvec;
+					if( c == 5 ) opos = opos + xvec - yvec + zvec;
+					if( c == 6 ) opos = opos + xvec - yvec - zvec;
+					if( c == 7 ) opos = opos - xvec - yvec - zvec;
+					tempqueue.push_back( Spocket() );
+					tempqueue.back().sparent = sp;
+					tempqueue.back().poslm = opos + xvec + yvec + zvec;
+					tempqueue.back().neglm = opos - xvec - yvec - zvec;
+					numnodes++;
 				}
-				tempqueue.push_back( Spocket() );
-				tempqueue[ tempqueue.size() - 1 ].sparent = 
-				tempqueue[ tempqueue.size() - 1 ].poslm = vec3(  );
-				tempqueue[ tempqueue.size() - 1 ].neglm = vec3(  );
-
-				curNodes += 8;
 			}
 
 		} // buildtree()
