@@ -37,7 +37,6 @@ vec3 BADVECTOR( -1000.0f, -1000.0f, -1000.0f );
 // Physics Box.
 class PBox {
 	public:
-		int winheight;
 		// Position of box.
 		vec3 pos;
 		// Scale of box.
