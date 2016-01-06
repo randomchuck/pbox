@@ -93,15 +93,16 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 		}
 		pboxes[numboxes - 1] = PBox( vec3(0, 0, 0), vec3(1, 1, 1), vec3(4, 1, 4), vrota, vang, false );
 
+		SpocTree sptree;
+		sptree.addsphere( vec3(0,0,0), 1 );
+		sptree.buildtree( 1 );
+
 	// Physics Box.
 	///////////////
 
 	// 3D Renderer.
 	boop.Initialize(hwnd);
-	for( int m = 0; m < numboxes; m++ ) {
-		boop.LoadMesh( "box.obj", "roadtile.bmp" );
-		// boop.GetMesh(m)->matrix *= scale( vec3(2.0f, 2.0f, 2.0f) );
-	}
+	boop.LoadMesh( "box.obj", "roadtile.bmp" );
 	boop.CameraLookat( vec3(1, 4.0f, 2.75f), vec3(0, 2, 0), vec3(0, 1, 0) );
 	boop.SetShading(2);
 
@@ -109,13 +110,34 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 	// X Button or ESC Key.
 	while( true ) {
 
+		// Prepare 3D Renderer.
+		boop.Clear();
+
 		if( GetAsyncKeyState(VK_SPACE) & 0x8000 ) {
 			for( int bx = 0; bx < numboxes - 1; bx++ ) {
 				pboxes[bx] = PBox( vpos + vec3((bx % 2) * 0.5f,  1 + bx * 1.25f, 0), vsize, vscal, vrota, vang, true );
 				pboxes[bx].setvel( vec3(0, -0.01f, 0) );
 			}
 		}
-
+		///////
+		// FPS
+		{
+			//// Frames Per Second.
+				static int fps = 0;
+				fps++;
+				static int fpstimer = 0;
+				static char strbfr[100] = {0};
+				if(GetTickCount() - fpstimer > 1000) {
+					for( int c = 0; c < 100; c++ ) strbfr[c] = 0;
+					sprintf( strbfr, "FPS - %d", fps );
+					fps = 0;
+					fpstimer = GetTickCount();
+				}
+				TextOut( boop.GetBackbuffer(), 10, 10, strbfr, strlen(strbfr) );
+		}	
+		// FPS
+		///////
+																																
 		if(true)
 		{
 			static int stimer = 0;
@@ -131,7 +153,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 			char strbfr[100] = {0};
 			avgtime += (GetTickCount() - stimer);
 			sprintf( strbfr, "UpdateBoxes() Time - %d", GetTickCount() - stimer );
-			TextOut( boop.GetBackbuffer(), 10, 85, strbfr, strlen(strbfr) );
+			TextOut( boop.GetBackbuffer(), 10, 80, strbfr, strlen(strbfr) );
 			for( int c = 0; c < 100; c++ ) strbfr[c] = 0;
 
 			sprintf( strbfr, "UpdateBoxes() Avg Time - %d", avgtime / numcnts );
@@ -141,12 +163,13 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 		}
 
 		for( int cb = 0; cb < numboxes; cb++ ) {
-			boop.GetMesh(cb)->matrix = pboxes[cb].mat;
-			boop.GetMesh(cb)->matrix *= scale( vec3(0.5f, 0.5f, 0.5f) );
+			mat4 mm = pboxes[cb].mat * scale( vec3(0.5f, 0.5f, 0.5f) );
+			boop.DrawMesh( *boop.GetMesh(0), &mm );
 		}
 
 		// Render 3D.
-		boop.Render();
+		// boop.Render();
+		boop.Blit();
 
 		// Wireframe, No Shading, Flat Shading, Gouraud Shading,
 		// Texture, No Texture.

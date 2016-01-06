@@ -34,8 +34,6 @@ struct Sfear {
 // Similar to Sfears, it has an upper and lower 
 // limit in world coordinates.
 struct Spocket {
-	// One node up in the hierarchy.
-	Spocket *sparent;
 	// Upper and lower limits to volume.
 	vec3 poslm;
 	vec3 neglm;
@@ -48,6 +46,15 @@ struct Spocket {
 	// childs[4] = UpperLeft/LowY, childs[5] = UpperRight/LowY, 
 	// childs[6] = LowerLeft/LowY, childs[7] = LowerRight/LowY
 	Spocket *childs[8];
+	
+	// Initializes Spocket.
+	Spocket() {
+		poslm = vec3( 0, 0, 0 );
+		neglm = poslm;
+		sindices.clear();
+		for( int c = 0; c < 8; c++ )
+			childs[c] = 0;
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,16 +122,17 @@ class SpocTree {
 			bucketlist.clear();
 
 			// Create new root.
-			bucketlist.push_back( Spocket() );
+			Spocket sproot;
 
 			// Set bounds of root.
-			bucketlist[0].poslm = vec3( _size ) + _pos;
-			bucketlist[0].neglm = bucketlist[0].poslm * -1 + _pos;
+			sproot.poslm = vec3( _size ) + _pos;
+			sproot.neglm = sproot.poslm * -1 + _pos;
 
 			// If depth is 0, add indices to root and return.
 			if( _depth == 0 ) {
-				for( int s = 0; s < slist.size(); s++ )
-					bucketlist[0].sindices.push_back( s );
+				for( unsigned int s = 0; s < slist.size(); s++ )
+					sproot.sindices.push_back( s );
+				bucketlist.push_back( sproot );
 				return;
 			}
 		
@@ -135,26 +143,23 @@ class SpocTree {
 			// The number of nodes we've created so far.
 			// About to add root.
 			int numnodes = 1;
-			// Queue for unprocessed buckets.
-			// Put head of bucket list into queue.
-			std::list <Spocket> tempqueue;
-			tempqueue.push_back( bucketlist[0] );
 			// This is used to track parent nodes for 
 			// children.
 			Spocket *sp = 0;
+			// Current node.
+			int curnode = 0;
+			// Add root to list.
+			bucketlist.push_back( sproot );
 
-			// If there are nodes in the queue, continue to process 
-			// them. Queue will get smaller as nodes are 
-			// moved from the queue to our bucket list.
-			while( tempqueue.size() ) {
 
-				// 
-				bucketlist.push_back( tempqueue.front() );
-				tempqueue.pop_front();
-				sp = &bucketlist.back();
+			// Loop until we've created enough nodes.
+			while( numnodes < maxnodes ) {
+				
+				// Point to current parent.
+				sp = &bucketlist[curnode];
 
-				// 
-				for( int c = 0; c < 8 && numnodes < maxnodes; c++ ) {
+				// Create 8 child nodes.
+				for( int c = 0; c < 8; c++ ) {
 					// Child node length.
 					vec3 clen = ((sp->poslm - sp->neglm) / 2);
 					// Parent origin. Later calculated to 
@@ -176,12 +181,13 @@ class SpocTree {
 					if( c == 5 ) opos = opos + xvec - yvec + zvec;
 					if( c == 6 ) opos = opos + xvec - yvec - zvec;
 					if( c == 7 ) opos = opos - xvec - yvec - zvec;
-					tempqueue.push_back( Spocket() );
-					tempqueue.back().sparent = sp;
-					tempqueue.back().poslm = opos + xvec + yvec + zvec;
-					tempqueue.back().neglm = opos - xvec - yvec - zvec;
+					bucketlist.push_back( Spocket() );
+					sp = &bucketlist[curnode];
+					bucketlist.back().poslm = opos + xvec + yvec + zvec;
+					bucketlist.back().neglm = opos - xvec - yvec - zvec;
 					numnodes++;
 				}
+				curnode++;
 			}
 
 		} // buildtree()
