@@ -71,7 +71,7 @@ class SpocTree {
 		std::vector <Sfear> slist;
 
 		// List of buckets. Root is the first element.
-		std::vector <Spocket> bucketlist;
+		std::list <Spocket> bucketlist;
 
 		///////////////////////////////////////////////////////////////////////
 		// Def C-Tor.
@@ -146,17 +146,17 @@ class SpocTree {
 			// This is used to track parent nodes for 
 			// children.
 			Spocket *sp = 0;
-			// Current node.
-			int curnode = 0;
 			// Add root to list.
 			bucketlist.push_back( sproot );
 
+			// Iterator for bucket list. Ugh...
+			std::list<Spocket>::iterator buckit = bucketlist.begin();
 
 			// Loop until we've created enough nodes.
 			while( numnodes < maxnodes ) {
 				
 				// Point to current parent.
-				sp = &bucketlist[curnode];
+				sp = &*buckit;
 
 				// Create 8 child nodes.
 				for( int c = 0; c < 8; c++ ) {
@@ -182,12 +182,45 @@ class SpocTree {
 					if( c == 6 ) opos = opos + xvec - yvec - zvec;
 					if( c == 7 ) opos = opos - xvec - yvec - zvec;
 					bucketlist.push_back( Spocket() );
-					sp = &bucketlist[curnode];
 					bucketlist.back().poslm = opos + xvec + yvec + zvec;
 					bucketlist.back().neglm = opos - xvec - yvec - zvec;
+					sp->childs[c] = &bucketlist.back();
 					numnodes++;
 				}
-				curnode++;
+				buckit++;
+
+			} // while()
+
+			// Put spheres in their place...
+			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
+				// Grab sphere position and radius.
+				vec3 ps = slist[sidx].pos;
+				float rd = slist[sidx].rad;
+				// Search bucketlist for nodes that could contain 
+				// this sphere.
+				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
+					// Only do checks on leaf nodes.
+					if( (*buckit).childs[0] ) continue;
+					// X left.
+					if( pboxes[c + 1].pos.x + pboxes[c + 1].largestaxis < pboxes[b].pos.x - pboxes[b].largestaxis )
+					    continue;
+					// X right.
+					if( pboxes[c + 1].pos.x - pboxes[c + 1].largestaxis > pboxes[b].pos.x + pboxes[b].largestaxis )
+					    continue;
+					// Y up.
+					if( pboxes[c + 1].pos.y - pboxes[c + 1].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis )
+					    continue;
+					// Y down.
+					if( pboxes[c + 1].pos.y + pboxes[c + 1].largestaxis < pboxes[b].pos.y - pboxes[b].largestaxis )
+					    continue;
+					// Z forward.
+					if( pboxes[c + 1].pos.z - pboxes[c + 1].largestaxis > pboxes[b].pos.z + pboxes[b].largestaxis )
+					    continue;
+					// Z backward.
+					if( pboxes[c + 1].pos.z + pboxes[c + 1].largestaxis < pboxes[b].pos.z - pboxes[b].largestaxis )
+					    continue;
+
+				}
 			}
 
 		} // buildtree()
