@@ -201,23 +201,24 @@ class SpocTree {
 				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
 					// Only do checks on leaf nodes.
 					if( (*buckit).childs[0] ) continue;
+					
 					// X left.
-					if( pboxes[c + 1].pos.x + pboxes[c + 1].largestaxis < pboxes[b].pos.x - pboxes[b].largestaxis )
+					if( ps.x + rd < pboxes[b].pos.x - pboxes[b].largestaxis )
 					    continue;
 					// X right.
-					if( pboxes[c + 1].pos.x - pboxes[c + 1].largestaxis > pboxes[b].pos.x + pboxes[b].largestaxis )
+					if( ps.x - rd > pboxes[b].pos.x + pboxes[b].largestaxis )
 					    continue;
 					// Y up.
-					if( pboxes[c + 1].pos.y - pboxes[c + 1].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis )
+					if( ps.y - rd > pboxes[b].pos.y + pboxes[b].largestaxis )
 					    continue;
 					// Y down.
-					if( pboxes[c + 1].pos.y + pboxes[c + 1].largestaxis < pboxes[b].pos.y - pboxes[b].largestaxis )
+					if( ps.y + rd < pboxes[b].pos.y - pboxes[b].largestaxis )
 					    continue;
 					// Z forward.
-					if( pboxes[c + 1].pos.z - pboxes[c + 1].largestaxis > pboxes[b].pos.z + pboxes[b].largestaxis )
+					if( ps.z - rd > pboxes[b].pos.z + pboxes[b].largestaxis )
 					    continue;
 					// Z backward.
-					if( pboxes[c + 1].pos.z + pboxes[c + 1].largestaxis < pboxes[b].pos.z - pboxes[b].largestaxis )
+					if( ps.z + rd < pboxes[b].pos.z - pboxes[b].largestaxis )
 					    continue;
 
 				}
