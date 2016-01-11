@@ -201,28 +201,34 @@ class SpocTree {
 				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
 					// Only do checks on leaf nodes.
 					if( (*buckit).childs[0] ) continue;
-					
-					// X left.
-					if( ps.x + rd < pboxes[b].pos.x - pboxes[b].largestaxis )
-					    continue;
-					// X right.
-					if( ps.x - rd > pboxes[b].pos.x + pboxes[b].largestaxis )
-					    continue;
-					// Y up.
-					if( ps.y - rd > pboxes[b].pos.y + pboxes[b].largestaxis )
-					    continue;
-					// Y down.
-					if( ps.y + rd < pboxes[b].pos.y - pboxes[b].largestaxis )
-					    continue;
-					// Z forward.
-					if( ps.z - rd > pboxes[b].pos.z + pboxes[b].largestaxis )
-					    continue;
-					// Z backward.
-					if( ps.z + rd < pboxes[b].pos.z - pboxes[b].largestaxis )
-					    continue;
+					vec3 bx[2];
+					bx[0] = (*buckit).poslm;
+					bx[1] = (*buckit).neglm;
+
 
 				}
 			}
 
 		} // buildtree()
+
+
+		///////////////////////////////////////////////////////////////////////
+		// Pass a vec3 and a vec3[2]. Expects _box[0] to be poslm - 
+		// ie, positive limit of box, and _box[1] to be negative.
+		// Returns true if _pnt is within this box.
+		bool pntinbox( const vec3 &_pnt, const vec3 &_box[2] ) {
+			
+			// X
+			if( _pnt.x > _box[0].x || _pnt.x < _box[1].x )
+				return false;
+			// Y
+			if( _pnt.y > _box[0].y || _pnt.y < _box[1].y ) 
+				return false;
+			// Z
+			if( _pnt.z > _box[0].z || _pnt.z < _box[1].z )
+				return false;
+			// The point is in the box.
+			return true;
+
+		} // pntinbox()
 };
