@@ -204,7 +204,7 @@ class SpocTree {
 					vec3 bx[2];
 					bx[0] = (*buckit).poslm;
 					bx[1] = (*buckit).neglm;
-
+					pntinbox( ps + vec3(rd, 0, 0), bx )
 
 				}
 			}
