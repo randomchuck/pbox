@@ -194,29 +194,86 @@ class SpocTree {
 			// Put spheres in their place...
 			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
 				// Grab sphere position and radius.
-				vec3 ps = slist[sidx].pos;
-				float rd = slist[sidx].rad;
+				vec3 spheer = vec3( slist[sidx].pos );
+				spheer.w = slist[sidx].rad;
 				// Search bucketlist for nodes that could contain 
 				// this sphere.
 				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
 					// Only do checks on leaf nodes.
 					if( (*buckit).childs[0] ) continue;
+					// Build second box. Sphere might be in it.
 					vec3 bx[2];
 					bx[0] = (*buckit).poslm;
 					bx[1] = (*buckit).neglm;
-					pntinbox( ps + vec3(rd, 0, 0), bx )
+					// Finally check to see if any part of the sphere is 
+					// within the box.
+					if( sphereboxinbox(spheer, bx) )
+						(*buckit).sindices.push_back( sidx );
 
-				}
-			}
+				} // for( buckit =...
+
+			} // for( unsigned int sidx...
 
 		} // buildtree()
+		
+		///////////////////////////////////////////////////////////////////////
+		// Takes a vector3 which contains a sphere's position and radius.
+		// vec3( p.x, p.y, p.z, radius ).
+		// Also accepts box bounds -> 
+		// _box[0] = positive point. _box[1] = negative point.
+		// 
+		// Now it doesn't work quite like you would think. It creates a 
+		// bounding box for the sphere using the pos and radius. It then 
+		// checks every point from that gen'd box and tests if contained 
+		// within _box. If any of those points are within _box, this returns 
+		// true.
+		// 
+		// So considering that, it's possible for a sphere to be too big and 
+		// be missed by certain _box's. Just make sure _box's are always bigger 
+		// than the spheres and this won't happen.
+		bool sphereboxinbox( const vec3 &s, const vec3 _box[2] ) {
+		
+			// Pull out pos and radius.
+			vec3 ps = s;
+			float rd = s.w;	
 
+			// Front Face.
+			// Low x, Low y, Low z(close to cam)
+			if( pntinbox( ps + vec3(-rd, -rd, -rd), _box ) )
+				return true;
+			// Low x, High y, Low z.
+			if( pntinbox( ps + vec3(-rd, rd, -rd), _box ) )
+				return true;
+			// High x, High y, Low z.
+			if( pntinbox( ps + vec3(rd, rd, -rd), _box ) )
+				return true;
+			// High x, Low y, Low z.
+			if( pntinbox( ps + vec3(rd, -rd, -rd), _box ) )
+				return true;
+			// Back Face.
+			// Low x, Low y, High z.
+			if( pntinbox( ps + vec3(-rd, -rd, rd), _box ) )
+				return true;
+			// Low x, High y, High z.
+			if( pntinbox( ps + vec3(-rd, rd, rd), _box ) )
+				return true;
+			// High x, High y, High z.
+			if( pntinbox( ps + vec3(rd, rd, rd), _box ) )
+				return true;
+			// High x, Low y, High z.
+			if( pntinbox( ps + vec3(rd, -rd, rd), _box ) )
+				return true;
+			// If we made it here, then none of the sphere 
+			// points are contained within the box.
+			return false;
+
+		} // sphereboxinbox()
 
 		///////////////////////////////////////////////////////////////////////
 		// Pass a vec3 and a vec3[2]. Expects _box[0] to be poslm - 
 		// ie, positive limit of box, and _box[1] to be negative.
 		// Returns true if _pnt is within this box.
-		bool pntinbox( const vec3 &_pnt, const vec3 &_box[2] ) {
+		bool pntinbox( const vec3 &_pnt, const vec3 _box[2] ) {
 			
 			// X
 			if( _pnt.x > _box[0].x || _pnt.x < _box[1].x )
