@@ -247,7 +247,6 @@ class PBox {
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Checks for a collision between two boxes/cubes.
-		// Only collision points for the calling box are generated.
 		void collision( PCollision &_pc, const PBox &box2 ) {
 
 			// Initialize collision info first.
