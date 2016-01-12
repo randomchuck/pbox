@@ -192,6 +192,8 @@ class SpocTree {
 			} // while()
 
 			// Put spheres in their place...
+			// Note: Very slow. Need to optimize so we're not potentially 
+			// checking every child. Follow the hierarchy.
 			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
 				// Grab sphere position and radius.
 				vec3 spheer = vec3( slist[sidx].pos );
