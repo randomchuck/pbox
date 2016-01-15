@@ -16,6 +16,18 @@
 HWND hwnd;               /* This is the handle for our window */
 Boop3D boop;
 
+HPEN hredpen;
+HPEN hblackpen;
+HPEN hbluepen;
+HPEN hgreenpen;
+HPEN hyellowpen;
+HPEN hmagentapen;
+HPEN holdpen;
+
+
+// Draws the sphere-octree.
+void drawspoc( void );
+
 //const int winwidth = 544;
 //const int winheight = 375;
 const int winwidth = 1000;
@@ -89,13 +101,9 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 		PBox pboxes[numboxes];
 		for( int bx = 0; bx < numboxes - 1; bx++ ) {
 			pboxes[bx] = PBox( vpos + vec3((bx % 2) * 0.5f,  1 + bx * 1.25f, 0), vsize, vscal, vrota, vang, true );
-			pboxes[bx].setvel( vec3(0, -0.01f, 0) );
+			//pboxes[bx].setvel( vec3(0, -0.01f, 0) );
 		}
 		pboxes[numboxes - 1] = PBox( vec3(0, 0, 0), vec3(1, 1, 1), vec3(4, 1, 4), vrota, vang, false );
-
-		SpocTree sptree;
-		sptree.addsphere( vec3(0,0,0), 1 );
-		sptree.buildtree( 1 );
 
 	// Physics Box.
 	///////////////
@@ -105,6 +113,15 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 	boop.LoadMesh( "box.obj", "roadtile.bmp" );
 	boop.CameraLookat( vec3(1, 4.0f, 2.75f), vec3(0, 2, 0), vec3(0, 1, 0) );
 	boop.SetShading(2);
+
+	// Create a bunch of pens.
+	hredpen = CreatePen( PS_SOLID, 1, RGB(255, 0, 0) );
+	hblackpen = CreatePen( PS_SOLID, 1, RGB(0, 0, 0) );
+	hgreenpen = CreatePen( PS_SOLID, 1, RGB(0, 255, 0) );
+	hbluepen = CreatePen( PS_SOLID, 1, RGB(0, 0, 255) );
+	hyellowpen = CreatePen( PS_SOLID, 1, RGB(255, 255, 0) );
+	hmagentapen = CreatePen( PS_SOLID, 1, RGB(255, 0, 255) );
+	holdpen = (HPEN)SelectObject( boop.GetBackbuffer(), hblackpen );
 
 	// Message Loop runs indefinitely until user presses
 	// X Button or ESC Key.
@@ -167,9 +184,12 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 			boop.DrawMesh( *boop.GetMesh(0), &mm );
 		}
 
+		// Draw octree.
+		drawspoc();
+
 		// Render 3D.
-		// boop.Render();
 		boop.Blit();
+
 
 		// Wireframe, No Shading, Flat Shading, Gouraud Shading,
 		// Texture, No Texture.
@@ -244,6 +264,16 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 		Sleep(16);
 	}
 
+	// Delete all of the pens.
+	SelectObject( boop.GetBackbuffer(), holdpen );
+	DeleteObject( hblackpen );
+	DeleteObject( hredpen );
+	DeleteObject( hbluepen );
+	DeleteObject( hgreenpen );
+	DeleteObject( hyellowpen );
+	DeleteObject( hmagentapen );
+
+
 	// Clean up.
 	boop.Shutdown();
 
@@ -272,4 +302,26 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
     }
 
     return DefWindowProc (hwnd, message, wParam, lParam);
+}
+
+// Draws the sphere-octree.
+void drawspoc( void ) {
+
+	char strbfr[100] = {0};
+	sprintf( strbfr, "sptree.slist.size() -  %d", sptree.slist.size() );
+	TextOut( boop.GetBackbuffer(), 10, 300, strbfr, strlen(strbfr) );
+	
+	for( int chr = 0; chr < 100; chr++ ) strbfr[chr] = 0;
+	sprintf( strbfr, "sptree.bucketlist.size() -  %d", sptree.bucketlist.size() );
+	TextOut( boop.GetBackbuffer(), 10, 325, strbfr, strlen(strbfr) );
+
+	std::list<Spocket>::iterator buckit = sptree.bucketlist.begin();
+
+	Spocket &sp = *buckit;
+
+	const int ZEROX = 200;
+	const int ZEROY = 400;
+	SelectObject( boop.GetBackbuffer(), hredpen );
+	MoveToEx( boop.GetBackbuffer(), sp.neglm.x + ZEROX, sp.neglm.y + ZEROY, 0 );
+	LineTo(  boop.GetBackbuffer(), sp.neglm.x + ZEROX, sp.neglm.y + ZEROY - sp.poslm.y );
 }

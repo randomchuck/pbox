@@ -73,12 +73,15 @@ class SpocTree {
 		// List of buckets. Root is the first element.
 		std::list <Spocket> bucketlist;
 
+		// The number of nodes the tree has.
+		int numnodes;
+
 		///////////////////////////////////////////////////////////////////////
 		// Def C-Tor.
-		SpocTree() {  }
+		SpocTree(): numnodes(0) {  }
 		///////////////////////////////////////////////////////////////////////
 		// Def Destructor.
-		~SpocTree() {  }
+		~SpocTree() { clear(); }
 	
 		///////////////////////////////////////////////////////////////////////
 		// Add a sphere to the list.
@@ -118,6 +121,9 @@ class SpocTree {
 			// Make sure user didn't pass something less than 0.
 			if( _depth < 0 ) return;
 
+			// We're rebuilding the tree so no nodes yet.
+			numnodes = 0;
+
 			// Clear the bucket list.
 			bucketlist.clear();
 
@@ -133,6 +139,7 @@ class SpocTree {
 				for( unsigned int s = 0; s < slist.size(); s++ )
 					sproot.sindices.push_back( s );
 				bucketlist.push_back( sproot );
+				numnodes = 1;
 				return;
 			}
 		
@@ -142,7 +149,7 @@ class SpocTree {
 			const int maxnodes = pow( 8, _depth ) + 1;
 			// The number of nodes we've created so far.
 			// About to add root.
-			int numnodes = 1;
+			numnodes = 1;
 			// This is used to track parent nodes for 
 			// children.
 			Spocket *sp = 0;
@@ -192,29 +199,7 @@ class SpocTree {
 			} // while()
 
 			// Put spheres in their place...
-			// Note: Very slow. Need to optimize so we're not potentially 
-			// checking every child. Follow the hierarchy.
-			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
-				// Grab sphere position and radius.
-				vec3 spheer = vec3( slist[sidx].pos );
-				spheer.w = slist[sidx].rad;
-				// Search bucketlist for nodes that could contain 
-				// this sphere.
-				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
-					// Only do checks on leaf nodes.
-					if( (*buckit).childs[0] ) continue;
-					// Build second box. Sphere might be in it.
-					vec3 bx[2];
-					bx[0] = (*buckit).poslm;
-					bx[1] = (*buckit).neglm;
-					// Finally check to see if any part of the sphere is 
-					// within the box.
-					if( sphereboxinbox(spheer, bx) )
-						(*buckit).sindices.push_back( sidx );
-
-				} // for( buckit =...
-
-			} // for( unsigned int sidx...
+			addspherestotree();
 
 		} // buildtree()
 		
@@ -290,4 +275,47 @@ class SpocTree {
 			return true;
 
 		} // pntinbox()
+
+
+		///////////////////////////////////////////////////////////////////////
+		// Add spheres/indices to appropriate bucket/leaf nodes in tree.
+		// 
+		// Note: Very slow. Need to optimize so we're not potentially 
+		// checking every child. Follow the hierarchy.
+		void addspherestotree( void ) {
+			// Iterator for bucket list. Ugh...
+			std::list<Spocket>::iterator buckit = bucketlist.begin();
+
+			// All spheres, add to tree leaf nodes.
+			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
+				// Grab sphere position and radius.
+				vec3 spheer = vec3( slist[sidx].pos );
+				spheer.w = slist[sidx].rad;
+				// Search bucketlist for nodes that could contain 
+				// this sphere.
+				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
+					// Only do checks on leaf nodes.
+					if( (*buckit).childs[0] ) continue;
+					// Build second box. Sphere might be in it.
+					vec3 bx[2];
+					bx[0] = (*buckit).poslm;
+					bx[1] = (*buckit).neglm;
+					// Finally check to see if any part of the sphere is 
+					// within the box.
+					if( sphereboxinbox(spheer, bx) )
+						(*buckit).sindices.push_back( sidx );
+
+				} // for( buckit =...
+
+			} // for( unsigned int sidx...
+		}
+
+		///////////////////////////////////////////////////////////////////////
+		// Cleans up lists/memory.
+		void clear( void ) {
+			// Empty all of the lists.
+			slist.clear();
+			bucketlist.clear();
+			numnodes = 0;
+		}
 };

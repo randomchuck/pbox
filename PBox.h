@@ -16,6 +16,14 @@
 // - Random forces.
 // - Reactions to collisions.
 // -- Utilizes collision points, rotation angles, and applies other forces.
+// 
+// Usage:
+// PBox pboxes[10];
+// for( int bx = 0; bx < 10; bx++ )
+// 		pboxes[bx] = PBox( vec3(0, bx, 0) );
+// PBox::update( pboxes, 10 );
+// mat4 m = pboxes[0].mat;   // <- Access box transform.
+// draw3dobject( obj, mat ); // <- Draw a box with it.
 
 // sqrt() and such.
 #include <math.h>
@@ -32,6 +40,9 @@
 
 // Useful for determining if certain functions passed/failed.
 vec3 BADVECTOR( -1000.0f, -1000.0f, -1000.0f );
+
+// PBoxes will use this to speed up collision detection.
+SpocTree sptree;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Physics Box.
@@ -105,6 +116,10 @@ class PBox {
 			lastrotaxis = vec3( 0, 0, 0 );
 			lastrotangle = 0.0f;
 		}
+
+		/////////////////////////////////////////////////////////////////////////////
+		// Destructor(). Will clear out octree for us.
+		~PBox() { if( sptree.numnodes ) sptree.clear(); }
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Find largest axis of this box. Can only be done after everything has been scaled.
@@ -682,6 +697,13 @@ class PBox {
 		// 
 		static void update( PBox *pboxes, int _numboxes ) {
 
+			// Create the octree if it doesn't exist.
+			if( sptree.numnodes == 0 ) {
+				for( int sidx = 0; sidx < _numboxes; sidx++ )
+					sptree.addsphere( pboxes[sidx].pos, pboxes[sidx].largestaxis );
+				sptree.buildtree( 1 );
+			}
+
 			// Update every box's vel/pos/etc.
 			for( int pb = 0; pb < _numboxes; pb++ ) {
 				// Update velocity.
@@ -694,25 +716,6 @@ class PBox {
 			for( int b = 0; b < _numboxes; b++ ) {
 
 				for( int c = b; c < _numboxes - 1; c++ ) {
-				//	// X left.
-				//	if( pboxes[c + 1].pos.x + pboxes[c + 1].largestaxis < pboxes[b].pos.x - pboxes[b].largestaxis )
-				//		continue;
-				//	// X right.
-				//	if( pboxes[c + 1].pos.x - pboxes[c + 1].largestaxis > pboxes[b].pos.x + pboxes[b].largestaxis )
-				//		continue;
-				//	// Y up.
-				//	if( pboxes[c + 1].pos.y - pboxes[c + 1].largestaxis > pboxes[b].pos.y + pboxes[b].largestaxis )
-				//		continue;
-				//	// Y down.
-				//	if( pboxes[c + 1].pos.y + pboxes[c + 1].largestaxis < pboxes[b].pos.y - pboxes[b].largestaxis )
-				//		continue;
-				//	// Z forward.
-				//	if( pboxes[c + 1].pos.z - pboxes[c + 1].largestaxis > pboxes[b].pos.z + pboxes[b].largestaxis )
-				//		continue;
-				//	// Z backward.
-				//	if( pboxes[c + 1].pos.z + pboxes[c + 1].largestaxis < pboxes[b].pos.z - pboxes[b].largestaxis )
-				//		continue;
-
 					// Check for a collision.
 					pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
 					// React to this collision.
@@ -742,7 +745,6 @@ class PBox {
 				} // for( int c...
 
 			} // for( int b...
-
 
 		} // update()
 };
