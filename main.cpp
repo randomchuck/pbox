@@ -323,5 +323,8 @@ void drawspoc( void ) {
 	const int ZEROY = 400;
 	SelectObject( boop.GetBackbuffer(), hredpen );
 	MoveToEx( boop.GetBackbuffer(), sp.neglm.x + ZEROX, sp.neglm.y + ZEROY, 0 );
-	LineTo(  boop.GetBackbuffer(), sp.neglm.x + ZEROX, sp.neglm.y + ZEROY - sp.poslm.y );
+	LineTo(  boop.GetBackbuffer(),  sp.neglm.x + ZEROX, sp.poslm.y + ZEROY - sp.poslm.y );
+	//LineTo(  boop.GetBackbuffer(),  sp.poslm.x + ZEROX, sp.poslm.y + ZEROY - sp.poslm.y );
+	//LineTo(  boop.GetBackbuffer(),  sp.poslm.x + ZEROX, sp.neglm.y + ZEROY );
+
 }
