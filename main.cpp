@@ -151,10 +151,10 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 					fpstimer = GetTickCount();
 				}
 				TextOut( boop.GetBackbuffer(), 10, 10, strbfr, strlen(strbfr) );
-		}	
+		}
 		// FPS
 		///////
-																																
+
 		if(true)
 		{
 			static int stimer = 0;
@@ -308,23 +308,29 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 void drawspoc( void ) {
 
 	char strbfr[100] = {0};
-	sprintf( strbfr, "sptree.slist.size() -  %d", sptree.slist.size() );
+	sprintf( strbfr, "sptree.slist.size() - %d", sptree.slist.size() );
 	TextOut( boop.GetBackbuffer(), 10, 300, strbfr, strlen(strbfr) );
-	
+
 	for( int chr = 0; chr < 100; chr++ ) strbfr[chr] = 0;
-	sprintf( strbfr, "sptree.bucketlist.size() -  %d", sptree.bucketlist.size() );
+	sprintf( strbfr, "sptree.bucketlist.size() - %d", sptree.bucketlist.size() );
 	TextOut( boop.GetBackbuffer(), 10, 325, strbfr, strlen(strbfr) );
 
-	std::list<Spocket>::iterator buckit = sptree.bucketlist.begin();
+	std::list<Spocket>::iterator begit = sptree.bucketlist.begin();
+	std::list<Spocket>::iterator endit = sptree.bucketlist.end();
+	std::list<Spocket>::iterator buckit = begit;
 
-	Spocket &sp = *buckit;
 
-	const int ZEROX = 200;
-	const int ZEROY = 400;
+	const int ZEROX = 300;
+	const int ZEROY = 300;
+
 	SelectObject( boop.GetBackbuffer(), hredpen );
-	MoveToEx( boop.GetBackbuffer(), sp.neglm.x + ZEROX, sp.neglm.y + ZEROY, 0 );
-	LineTo(  boop.GetBackbuffer(),  sp.neglm.x + ZEROX, sp.poslm.y + ZEROY - sp.poslm.y );
-	//LineTo(  boop.GetBackbuffer(),  sp.poslm.x + ZEROX, sp.poslm.y + ZEROY - sp.poslm.y );
-	//LineTo(  boop.GetBackbuffer(),  sp.poslm.x + ZEROX, sp.neglm.y + ZEROY );
 
+	for( buckit = begit; buckit != endit; buckit++ ) {
+		Spocket &sp = *buckit;
+		MoveToEx( boop.GetBackbuffer(), ZEROX + sp.neglm.x, ZEROY - sp.neglm.y, 0 );
+		LineTo(  boop.GetBackbuffer(),  ZEROX + sp.neglm.x, ZEROY - sp.poslm.y );
+		LineTo(  boop.GetBackbuffer(),  ZEROX + sp.poslm.x, ZEROY - sp.poslm.y );
+		LineTo(  boop.GetBackbuffer(),  ZEROX + sp.poslm.x, ZEROY - sp.neglm.y );
+		LineTo(  boop.GetBackbuffer(),  ZEROX + sp.neglm.x, ZEROY - sp.neglm.y );
+	}
 }

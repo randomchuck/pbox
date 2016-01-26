@@ -701,7 +701,7 @@ class PBox {
 			if( sptree.numnodes == 0 ) {
 				for( int sidx = 0; sidx < _numboxes; sidx++ )
 					sptree.addsphere( pboxes[sidx].pos, pboxes[sidx].largestaxis );
-				sptree.buildtree( 1 );
+				sptree.buildtree( 3 );
 			}
 
 			// Update every box's vel/pos/etc.
