@@ -226,33 +226,32 @@ class SpocTree {
 
 			// Front Face.
 			// Low x, Low y, Low z(close to cam)
-			if( pntinbox( ps + vec3(-rd, -rd, -rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(-rd, -rd, -rd), _box ) )
+				return false;
 			// Low x, High y, Low z.
-			if( pntinbox( ps + vec3(-rd, rd, -rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(-rd, rd, -rd), _box ) )
+				return false;
 			// High x, High y, Low z.
-			if( pntinbox( ps + vec3(rd, rd, -rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(rd, rd, -rd), _box ) )
+				return false;
 			// High x, Low y, Low z.
-			if( pntinbox( ps + vec3(rd, -rd, -rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(rd, -rd, -rd), _box ) )
+				return false;
 			// Back Face.
 			// Low x, Low y, High z.
-			if( pntinbox( ps + vec3(-rd, -rd, rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(-rd, -rd, rd), _box ) )
+				return false;
 			// Low x, High y, High z.
-			if( pntinbox( ps + vec3(-rd, rd, rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(-rd, rd, rd), _box ) )
+				return false;
 			// High x, High y, High z.
-			if( pntinbox( ps + vec3(rd, rd, rd), _box ) )
-				return true;
+			if( !pntinbox( ps + vec3(rd, rd, rd), _box ) )
+				return false;
 			// High x, Low y, High z.
-			if( pntinbox( ps + vec3(rd, -rd, rd), _box ) )
-				return true;
-			// If we made it here, then none of the sphere 
-			// points are contained within the box.
-			return false;
+			if( !pntinbox( ps + vec3(rd, -rd, rd), _box ) )
+				return false;
+			// All of the points are within the box!
+			return true;
 
 		} // sphereboxinbox()
 
@@ -279,9 +278,6 @@ class SpocTree {
 
 		///////////////////////////////////////////////////////////////////////
 		// Add spheres/indices to appropriate bucket/leaf nodes in tree.
-		// 
-		// Note: Very slow. Need to optimize so we're not potentially 
-		// checking every child. Follow the hierarchy.
 		void addspherestotree( void ) {
 			// Iterator for bucket list. Ugh...
 			std::list<Spocket>::iterator buckit = bucketlist.begin();
