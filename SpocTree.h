@@ -46,6 +46,9 @@ struct Spocket {
 	// childs[4] = UpperLeft/LowY, childs[5] = UpperRight/LowY, 
 	// childs[6] = LowerLeft/LowY, childs[7] = LowerRight/LowY
 	Spocket *childs[8];
+	// Parent node.
+	// 0 if root.
+	Spocket *parent;
 	
 	// Initializes Spocket.
 	Spocket() {
@@ -54,6 +57,7 @@ struct Spocket {
 		sindices.clear();
 		for( int c = 0; c < 8; c++ )
 			childs[c] = 0;
+		parent = 0;
 	}
 };
 
@@ -133,6 +137,7 @@ class SpocTree {
 			// Set bounds of root.
 			sproot.poslm = vec3( _size ) + _pos;
 			sproot.neglm = sproot.poslm * -1 + _pos;
+			sproot.parent = 0;
 
 			// If depth is 0, add indices to root and return.
 			if( _depth == 0 ) {
@@ -191,6 +196,7 @@ class SpocTree {
 					bucketlist.push_back( Spocket() );
 					bucketlist.back().poslm = opos + xvec + yvec + zvec;
 					bucketlist.back().neglm = opos - xvec - yvec - zvec;
+					bucketlist.back().parent = sp;
 					sp->childs[c] = &bucketlist.back();
 					numnodes++;
 				}
@@ -212,12 +218,8 @@ class SpocTree {
 		// Now it doesn't work quite like you would think. It creates a 
 		// bounding box for the sphere using the pos and radius. It then 
 		// checks every point from that gen'd box and tests if contained 
-		// within _box. If any of those points are within _box, this returns 
+		// within _box. If all of those points are within _box, this returns 
 		// true.
-		// 
-		// So considering that, it's possible for a sphere to be too big and 
-		// be missed by certain _box's. Just make sure _box's are always bigger 
-		// than the spheres and this won't happen.
 		bool sphereboxinbox( const vec3 &s, const vec3 _box[2] ) {
 		
 			// Pull out pos and radius.
@@ -277,32 +279,47 @@ class SpocTree {
 
 
 		///////////////////////////////////////////////////////////////////////
+		// Recursively adds a sphere index to one of the octree 
+		// nodes.
+		bool _addsphere( Spocket *_node, int _sidx ) {
+			// Grab sphere position and radius.
+			vec3 spheer = vec3( slist[_sidx].pos );
+			spheer.w = slist[_sidx].rad;
+			// Build second box. Sphere might be in it.
+			vec3 bx[2];
+			bx[0] = _node->poslm;
+			bx[1] = _node->neglm;
+			// Is the sphere within this box?
+			if( sphereboxinbox(spheer, bx) ) {
+				// The sphere may be in one of its children, too.
+				if( _node->childs[0] ) {
+					for( int ch = 0; ch < 8; ch++ ) {
+						if( _addsphere( _node->childs[ch], _sidx ) ) {
+							return true;
+						}
+					}
+				}
+				// If none of the children(if they existed) could house our 
+				// sphere, we'll keep it.
+				_node->sindices.push_back( _sidx );
+				return true;
+			}
+			// Neither this node nor its children could hold this 
+			// sphere.
+			return false;
+		}
+
+
+		///////////////////////////////////////////////////////////////////////
 		// Add spheres/indices to appropriate bucket/leaf nodes in tree.
 		void addspherestotree( void ) {
 			// Iterator for bucket list. Ugh...
-			std::list<Spocket>::iterator buckit = bucketlist.begin();
+			//std::list<Spocket>::iterator buckit = bucketlist.begin();
+			Spocket *sproot = &*bucketlist.begin();
 
-			// All spheres, add to tree leaf nodes.
+			// All spheres, add to tree.
 			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
-				// Grab sphere position and radius.
-				vec3 spheer = vec3( slist[sidx].pos );
-				spheer.w = slist[sidx].rad;
-				// Search bucketlist for nodes that could contain 
-				// this sphere.
-				for( buckit = bucketlist.begin(); buckit != bucketlist.end(); buckit++ ) {
-					// Only do checks on leaf nodes.
-					if( (*buckit).childs[0] ) continue;
-					// Build second box. Sphere might be in it.
-					vec3 bx[2];
-					bx[0] = (*buckit).poslm;
-					bx[1] = (*buckit).neglm;
-					// Finally check to see if any part of the sphere is 
-					// within the box.
-					if( sphereboxinbox(spheer, bx) )
-						(*buckit).sindices.push_back( sidx );
-
-				} // for( buckit =...
-
+					_addsphere( sproot, sidx );
 			} // for( unsigned int sidx...
 		}
 
