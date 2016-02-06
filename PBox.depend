@@ -14,17 +14,18 @@
 
 1446923234 c:\softe\common_11.18.2015\opengl\ogx\source\glm_lite.h
 
-1451257508 source:d:\programming\pbox\main.cpp
+1454643460 source:d:\programming\pbox\main.cpp
 	<tchar.h>
 	<windows.h>
 	<stdio.h>
 	"PBox.h"
 	"../Boop/Boop3D.h"
 
-1451257782 d:\programming\pbox\pbox.h
+1454745261 d:\programming\pbox\pbox.h
 	<math.h>
 	"GLM_Lite.h"
 	"PCollision.h"
+	"SpocTree.h"
 
 1446923234 d:\programming\common_11.18.2015\opengl\ogx\source\glm_lite.h
 
@@ -59,7 +60,7 @@
 
 1446923234 d:\programming\common_12.16.2015\opengl\ogx\source\glm_lite.h
 
-1450912194 d:\programming\pbox\pcollision.h
+1454642852 d:\programming\pbox\pcollision.h
 	"GLM_Lite.h"
 
 1446923235 source:d:\programming\common_12.16.2015\opengl\ogx\source\glm_lite.cpp
@@ -84,14 +85,14 @@
 
 1446923234 d:\programming\common_12.18.2015\opengl\ogx\source\glm_lite.h
 
-1451163696 d:\programming\boop\boop3d.h
+1452227306 d:\programming\boop\boop3d.h
 	<windows.h>
 	"GLM_Lite.h"
 	<vector>
 	<string>
 	<math.h>
 
-1451181233 source:d:\programming\boop\boop3d.cpp
+1452227306 source:d:\programming\boop\boop3d.cpp
 	"Boop3D.h"
 	<stdio.h>
 
@@ -107,6 +108,11 @@
 	<math.h>
 
 1454713035 c:\softe\pbox\spoctree.h
+	<vector>
+	<list>
+	"Glm_Lite.h"
+
+1454743200 d:\programming\pbox\spoctree.h
 	<vector>
 	<list>
 	"Glm_Lite.h"

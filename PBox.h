@@ -687,6 +687,7 @@ class PBox {
 		// Note: Call every iteration and you MUST pass a box and 
 		// a number. 
 		// Another Note: DOESN'T CHECK POINTER OR NUMBOXES!
+		// If you have 10 boxes you better use _numboxes = 10.
 		// Example 1: 
 		// PBox boxes[2];
 		// PBox::update( boxes, 2 );
@@ -698,11 +699,11 @@ class PBox {
 		static void update( PBox *pboxes, int _numboxes ) {
 
 			// Create the octree if it doesn't exist.
-			if( sptree.numnodes == 0 ) {
-				for( int sidx = 0; sidx < _numboxes; sidx++ )
-					sptree.addsphere( pboxes[sidx].pos, pboxes[sidx].largestaxis );
-				sptree.buildtree( 3 );
-			}
+			//if( sptree.numnodes == 0 ) {
+		//		for( int sidx = 0; sidx < _numboxes; sidx++ )
+		//			sptree.addsphere( pboxes[sidx].pos, pboxes[sidx].largestaxis );
+		//		sptree.buildtree( 3 );
+			//}
 
 			// Update every box's vel/pos/etc.
 			for( int pb = 0; pb < _numboxes; pb++ ) {
@@ -710,41 +711,92 @@ class PBox {
 				pboxes[pb].vel = pboxes[pb].vel + pboxes[pb].accel;
 				// Update position.
 				pboxes[pb].setpos( pboxes[pb].pos + pboxes[pb].vel );
+				// Add this box/sphere to the octree.
+				sptree.addsphere( pboxes[pb].pos, pboxes[pb].largestaxis );
 			}
+			// Build octree.
+			std::vector<Spocket *> *shortlist = sptree.buildtree( 3 );
+
+			// For every node that contains indices to boxes, 
+			// for every box - check against all other boxes 
+			// in its vicinity for a collision.
+			int slsize = shortlist->size();
+			for( int sn = 0; sn < slsize; sn++ ) {
+				// Number of indices in this bucket node.
+				int numidx = ((*shortlist)[sn])->sindices.size();
+				for( int cb1 = 0; cb1 < numidx; cb1++ ) {
+					// Index of first box to check.
+					int idx1 = ((*shortlist)[sn])->sindices[cb1];
+					for( int cb2 = cb1; cb2 < numidx - 1; cb2++ ) {
+						
+						// Index of second box to check.
+						int idx2 = ((*shortlist)[sn])->sindices[cb2];
+
+						// Finally do collision check.
+						pboxes[cb1].collision( pboxes[cb1].pc, pboxes[cb2 + 1] );
+
+						// React to the collision.
+						if( pboxes[cb1].pc.numcolpnts > 0 ) {
+							// Fix penetration and react for box 1.
+							if( pboxes[cb1].dynamic ) {
+								pboxes[cb1].fixpenetration( pboxes[cb1].pc );
+								pboxes[cb1].reaction( pboxes[cb1].pc );
+							}
+							// Grab collision info for second box.
+							// Check for bumps, fix penetration, and reaction.
+							if( pboxes[cb2 + 1].dynamic ) {
+								pboxes[cb2 + 1].collision( pboxes[cb2 + 1].pc, pboxes[cb1] );
+								if( pboxes[cb2 + 1].pc.numcolpnts > 0 ) {
+									pboxes[cb2 + 1].fixpenetration( pboxes[cb2 + 1].pc );
+									pboxes[cb2 + 1].reaction( pboxes[cb2 + 1].pc );
+								}
+							}
+
+						} // if( pboxes[cb1].pc.numcolpnts...
+
+					} // for( int cb2 = 0...
+
+				} // for( int cb1 = 0...
+
+			} // for( int sn = 0...
+			
 
 			// Do collision/reaction for every box.
-			for( int b = 0; b < _numboxes; b++ ) {
+		//	for( int b = 0; b < _numboxes; b++ ) {
 
-				for( int c = b; c < _numboxes - 1; c++ ) {
-					// Check for a collision.
-					pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
-					// React to this collision.
-					if( pboxes[b].pc.numcolpnts > 0 ) {
-						// Fix penetration and react for box 1. 
-						if( pboxes[b].dynamic ) {
-							pboxes[b].fixpenetration( pboxes[b].pc );
-							pboxes[b].reaction( pboxes[b].pc );
-						}
-						// Grab collision info for second box.
-						if( pboxes[c + 1].dynamic ) {
-							pboxes[c + 1].collision( pboxes[c + 1].pc, pboxes[b] );
-							if( pboxes[c + 1].pc.numcolpnts > 0 ) {
-								pboxes[c + 1].fixpenetration( pboxes[c + 1].pc );
-								pboxes[c + 1].reaction( pboxes[c + 1].pc );
-							}
-							else {
-								// pboxes[c + 1].applylastrot();
-							}
-						}
+		//		for( int c = b; c < _numboxes - 1; c++ ) {
+		//			// Check for a collision.
+		//			pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
+		//			// React to this collision.
+		//			if( pboxes[b].pc.numcolpnts > 0 ) {
+		//				// Fix penetration and react for box 1. 
+		//				if( pboxes[b].dynamic ) {
+		//					pboxes[b].fixpenetration( pboxes[b].pc );
+		//					pboxes[b].reaction( pboxes[b].pc );
+		//				}
+		//				// Grab collision info for second box.
+		//				if( pboxes[c + 1].dynamic ) {
+		//					pboxes[c + 1].collision( pboxes[c + 1].pc, pboxes[b] );
+		//					if( pboxes[c + 1].pc.numcolpnts > 0 ) {
+		//						pboxes[c + 1].fixpenetration( pboxes[c + 1].pc );
+		//						pboxes[c + 1].reaction( pboxes[c + 1].pc );
+		//					}
+		//					else {
+		//						// pboxes[c + 1].applylastrot();
+		//					}
+		//				}
 
-					} // if( pc.numcolpnts...
-					else {
-						// pboxes[b].applylastrot();
-					}
+		//			} // if( pc.numcolpnts...
+		//			else {
+		//				// pboxes[b].applylastrot();
+		//			}
 
-				} // for( int c...
+		//		} // for( int c...
 
-			} // for( int b...
+		//	} // for( int b...
+
+			// Clear tree. We're going to rebuild it every frame.
+			sptree.clear();
 
 		} // update()
 };

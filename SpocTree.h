@@ -77,6 +77,13 @@ class SpocTree {
 		// List of buckets. Root is the first element.
 		std::list <Spocket> bucketlist;
 
+		// List of buckets that contain indices.
+		// By creating a smaller list, we're reducing the number of buckets we 
+		// have to check. Granted, you could just iterate through all buckets 
+		// to see if indices were added, but that could potentially be thousands of 
+		// checks.
+		std::vector <Spocket *> shortlist;
+
 		// The number of nodes the tree has.
 		int numnodes;
 
@@ -119,16 +126,20 @@ class SpocTree {
 		// buckets.
 		// Helps scenarios where objects are axis aligned.
 		// Can improve/degrade performance.
-		void buildtree( const int _depth = 1, 
-						const vec3 &_size = vec3(100, 100, 100),  
-						const vec3 &_pos = vec3(0, 0, 0) ) {
-			// Make sure user didn't pass something less than 0.
-			if( _depth < 0 ) return;
+		// 
+		// Return - A pointer to a list(vector) containing nodes that 
+		// have sphere indices.
+		std::vector<Spocket *> *buildtree( const int _depth = 1, 
+										   const vec3 &_size = vec3(100, 100, 100),  
+										   const vec3 &_pos = vec3(0, 0, 0) ) {
+			// This octree implementation can't use negative numbers.
+			if( _depth < 0 ) return 0;
 
 			// We're rebuilding the tree so no nodes yet.
 			numnodes = 0;
 
-			// Clear the bucket list.
+			// Clear the bucket list in case our own clear()
+			// wasn't called.
 			bucketlist.clear();
 
 			// Create new root.
@@ -139,13 +150,20 @@ class SpocTree {
 			sproot.neglm = sproot.poslm * -1 + _pos;
 			sproot.parent = 0;
 
-			// If depth is 0, add indices to root and return.
+			// If depth is 0, add indices to root.
 			if( _depth == 0 ) {
+				// Add indices.
 				for( unsigned int s = 0; s < slist.size(); s++ )
 					sproot.sindices.push_back( s );
+				// Add root to list.
 				bucketlist.push_back( sproot );
 				numnodes = 1;
-				return;
+				// Update shortlist. Even with 1 node, the user 
+				// will still need it.
+				shortlist.push_back( &*bucketlist.begin() );
+				// Give 'em the short list so they can check 
+				// for collisions already.
+				return &shortlist;
 			}
 		
 			// Depth is 1 or greater. We will continue to add 
@@ -206,6 +224,9 @@ class SpocTree {
 
 			// Put spheres in their place...
 			addspherestotree();
+
+			// Return the short list.
+			return &shortlist;
 
 		} // buildtree()
 		
@@ -277,6 +298,18 @@ class SpocTree {
 
 		} // pntinbox()
 
+		///////////////////////////////////////////////////////////////////////
+		// Add a bucket pointer to the shortlist. Prevents for duplicates.
+		void addtoshortlist( Spocket *_node ) {
+			// Make sure it's not already in there.
+			int sz = shortlist.size();
+			for( int cn = 0; cn < sz; cn++ )
+				if( shortlist[sz] == _node )
+					return;
+			// Looks like that node wasn't already in the list.
+			// Safe to add.
+			shortlist.push_back( _node );
+		}
 
 		///////////////////////////////////////////////////////////////////////
 		// Recursively adds a sphere index to one of the octree 
@@ -302,6 +335,11 @@ class SpocTree {
 				// If none of the children(if they existed) could house our 
 				// sphere, we'll keep it.
 				_node->sindices.push_back( _sidx );
+
+				// Add this node to the short list.
+				addtoshortlist( _node );
+
+				// Sphere placed. Success.
 				return true;
 			}
 			// Neither this node nor its children could hold this 
@@ -314,19 +352,19 @@ class SpocTree {
 		// Add spheres/indices to appropriate bucket/leaf nodes in tree.
 		void addspherestotree( void ) {
 			// Iterator for bucket list. Ugh...
-			//std::list<Spocket>::iterator buckit = bucketlist.begin();
 			Spocket *sproot = &*bucketlist.begin();
 
 			// All spheres, add to tree.
 			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
 					_addsphere( sproot, sidx );
-			} // for( unsigned int sidx...
+			}
 		}
 
 		///////////////////////////////////////////////////////////////////////
 		// Cleans up lists/memory.
 		void clear( void ) {
 			// Empty all of the lists.
+			shortlist.clear();
 			slist.clear();
 			bucketlist.clear();
 			numnodes = 0;
