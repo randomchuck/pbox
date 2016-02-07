@@ -715,7 +715,7 @@ class PBox {
 				sptree.addsphere( pboxes[pb].pos, pboxes[pb].largestaxis );
 			}
 			// Build octree.
-			std::vector<Spocket *> *shortlist = sptree.buildtree( 3 );
+			std::vector<Spocket *> *shortlist = sptree.buildtree( 1, vec3(150, 150, 150), vec3(10.0f, -10.0f, 10.0f) );
 
 			// For every node that contains indices to boxes, 
 			// for every box - check against all other boxes 
@@ -727,28 +727,28 @@ class PBox {
 				for( int cb1 = 0; cb1 < numidx; cb1++ ) {
 					// Index of first box to check.
 					int idx1 = ((*shortlist)[sn])->sindices[cb1];
-					for( int cb2 = cb1; cb2 < numidx - 1; cb2++ ) {
+					for( int cb2 = cb1 + 1; cb2 < numidx; cb2++ ) {
 						
 						// Index of second box to check.
 						int idx2 = ((*shortlist)[sn])->sindices[cb2];
 
 						// Finally do collision check.
-						pboxes[cb1].collision( pboxes[cb1].pc, pboxes[cb2 + 1] );
+						pboxes[idx1].collision( pboxes[idx1].pc, pboxes[idx2] );
 
 						// React to the collision.
-						if( pboxes[cb1].pc.numcolpnts > 0 ) {
+						if( pboxes[idx1].pc.numcolpnts > 0 ) {
 							// Fix penetration and react for box 1.
-							if( pboxes[cb1].dynamic ) {
-								pboxes[cb1].fixpenetration( pboxes[cb1].pc );
-								pboxes[cb1].reaction( pboxes[cb1].pc );
+							if( pboxes[idx1].dynamic ) {
+								pboxes[idx1].fixpenetration( pboxes[idx1].pc );
+								pboxes[idx1].reaction( pboxes[idx1].pc );
 							}
 							// Grab collision info for second box.
 							// Check for bumps, fix penetration, and reaction.
-							if( pboxes[cb2 + 1].dynamic ) {
-								pboxes[cb2 + 1].collision( pboxes[cb2 + 1].pc, pboxes[cb1] );
-								if( pboxes[cb2 + 1].pc.numcolpnts > 0 ) {
-									pboxes[cb2 + 1].fixpenetration( pboxes[cb2 + 1].pc );
-									pboxes[cb2 + 1].reaction( pboxes[cb2 + 1].pc );
+							if( pboxes[idx2].dynamic ) {
+								pboxes[idx2].collision( pboxes[idx2].pc, pboxes[idx1] );
+								if( pboxes[idx2].pc.numcolpnts > 0 ) {
+									pboxes[idx2].fixpenetration( pboxes[idx2].pc );
+									pboxes[idx2].reaction( pboxes[idx2].pc );
 								}
 							}
 

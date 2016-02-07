@@ -320,8 +320,8 @@ void drawspoc( void ) {
 	std::list<Spocket>::iterator buckit = begit;
 
 
-	const int ZEROX = 300;
-	const int ZEROY = 300;
+	const int ZEROX = 400;
+	const int ZEROY = 400;
 
 	SelectObject( boop.GetBackbuffer(), hredpen );
 

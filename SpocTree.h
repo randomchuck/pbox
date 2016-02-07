@@ -34,6 +34,8 @@ struct Sfear {
 // Similar to Sfears, it has an upper and lower 
 // limit in world coordinates.
 struct Spocket {
+	// Unique Identifier...
+	int id;
 	// Upper and lower limits to volume.
 	vec3 poslm;
 	vec3 neglm;
@@ -52,6 +54,7 @@ struct Spocket {
 	
 	// Initializes Spocket.
 	Spocket() {
+		id = -1;
 		poslm = vec3( 0, 0, 0 );
 		neglm = poslm;
 		sindices.clear();
@@ -148,7 +151,14 @@ class SpocTree {
 			// Set bounds of root.
 			sproot.poslm = vec3( _size ) + _pos;
 			sproot.neglm = sproot.poslm * -1 + _pos;
+			// No parent.
 			sproot.parent = 0;
+
+			// Id's help with testing for duplicate nodes in lists.
+			int globid = 0;
+
+			// Root node gets the first id.
+			sproot.id = globid++;
 
 			// If depth is 0, add indices to root.
 			if( _depth == 0 ) {
@@ -211,7 +221,9 @@ class SpocTree {
 					if( c == 5 ) opos = opos + xvec - yvec + zvec;
 					if( c == 6 ) opos = opos + xvec - yvec - zvec;
 					if( c == 7 ) opos = opos - xvec - yvec - zvec;
+					// Set id, bounds, and parent.
 					bucketlist.push_back( Spocket() );
+					bucketlist.back().id = globid++;
 					bucketlist.back().poslm = opos + xvec + yvec + zvec;
 					bucketlist.back().neglm = opos - xvec - yvec - zvec;
 					bucketlist.back().parent = sp;
@@ -304,7 +316,7 @@ class SpocTree {
 			// Make sure it's not already in there.
 			int sz = shortlist.size();
 			for( int cn = 0; cn < sz; cn++ )
-				if( shortlist[sz] == _node )
+				if( shortlist[cn]->id == _node->id )
 					return;
 			// Looks like that node wasn't already in the list.
 			// Safe to add.
