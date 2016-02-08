@@ -663,7 +663,8 @@ class PBox {
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
-		// 
+		// If the box has rotated previously, this will apply that last rotation 
+		// again. Used to simulate angular momentum.
 		void applylastrot( void ) {
 			if( lastrotangle ) {
 				// Prepare vectors for multaa().
@@ -679,6 +680,47 @@ class PBox {
 				setrot( naxis, nangle );
 			}
 		}
+
+		// 
+		static void bucketcol( PBox *pboxes, Spocket *snode, int sidx, int &colz ) {
+			int numindices = snode->sindices.size();
+			for( int s = 0; s < numindices; s++ ) {
+				int curnodeidx = snode->sindices[s];
+				if( curnodeidx == sidx ) continue;
+
+				// Finally do collision check.
+				pboxes[sidx].collision( pboxes[sidx].pc, pboxes[curnodeidx] );
+				colz++;
+				// React to the collision.
+				if( pboxes[sidx].pc.numcolpnts > 0 ) {
+					// Fix penetration and react for box 1.
+					if( pboxes[sidx].dynamic ) {
+						pboxes[sidx].fixpenetration( pboxes[sidx].pc );
+						pboxes[sidx].reaction( pboxes[sidx].pc );
+					}
+					// Grab collision info for second box.
+					// Check for bumps, fix penetration, and react.
+					if( pboxes[curnodeidx].dynamic ) {
+						pboxes[curnodeidx].collision( pboxes[curnodeidx].pc, pboxes[sidx] );
+						colz++;
+						if( pboxes[curnodeidx].pc.numcolpnts > 0 ) {
+							pboxes[curnodeidx].fixpenetration( pboxes[curnodeidx].pc );
+							pboxes[curnodeidx].reaction( pboxes[curnodeidx].pc );
+						}
+					}
+
+				} // if( pboxes[cb1].pc.numcolpnts...
+
+			} // for( int s == 0...
+
+			if( snode->childs[0] ) {
+				for( int c = 0; c < 8; c++ ) {
+					if( snode->childs[c]->sindices.size() > 0 )
+						bucketcol( pboxes, snode->childs[c], sidx, colz );
+				}
+			}
+
+		} // bucketcol()
 
 		/////////////////////////////////////////////////////////////////////////////
 		// 
@@ -715,25 +757,33 @@ class PBox {
 				sptree.addsphere( pboxes[pb].pos, pboxes[pb].largestaxis );
 			}
 			// Build octree.
-			std::vector<Spocket *> *shortlist = sptree.buildtree( 1, vec3(150, 150, 150), vec3(10.0f, -10.0f, 10.0f) );
+			std::vector<Spocket *> *shortlist = sptree.buildtree( 4, vec3(150, 150, 150), vec3(10.0f, 0.0f, 10.0f) );
 
 			// For every node that contains indices to boxes, 
 			// for every box - check against all other boxes 
 			// in its vicinity for a collision.
+			int colz = 0;
 			int slsize = shortlist->size();
 			for( int sn = 0; sn < slsize; sn++ ) {
+				Spocket *curbucket = ((*shortlist)[sn]);
+				//int numidx = curbucket->sindices.size();
+				//for( int pb = 0; pb < numidx; pb++ )
+				//	bucketcol( pboxes, curbucket, curbucket->sindices[pb] );
+
+
 				// Number of indices in this bucket node.
-				int numidx = ((*shortlist)[sn])->sindices.size();
+				int numidx = curbucket->sindices.size();
 				for( int cb1 = 0; cb1 < numidx; cb1++ ) {
 					// Index of first box to check.
-					int idx1 = ((*shortlist)[sn])->sindices[cb1];
+					int idx1 = curbucket->sindices[cb1];
 					for( int cb2 = cb1 + 1; cb2 < numidx; cb2++ ) {
 						
 						// Index of second box to check.
-						int idx2 = ((*shortlist)[sn])->sindices[cb2];
+						int idx2 = curbucket->sindices[cb2];
 
 						// Finally do collision check.
 						pboxes[idx1].collision( pboxes[idx1].pc, pboxes[idx2] );
+						colz++;
 
 						// React to the collision.
 						if( pboxes[idx1].pc.numcolpnts > 0 ) {
@@ -743,9 +793,10 @@ class PBox {
 								pboxes[idx1].reaction( pboxes[idx1].pc );
 							}
 							// Grab collision info for second box.
-							// Check for bumps, fix penetration, and reaction.
+							// Check for bumps, fix penetration, and react.
 							if( pboxes[idx2].dynamic ) {
 								pboxes[idx2].collision( pboxes[idx2].pc, pboxes[idx1] );
+								colz++;
 								if( pboxes[idx2].pc.numcolpnts > 0 ) {
 									pboxes[idx2].fixpenetration( pboxes[idx2].pc );
 									pboxes[idx2].reaction( pboxes[idx2].pc );
@@ -756,10 +807,18 @@ class PBox {
 
 					} // for( int cb2 = 0...
 
+					if( curbucket->childs[0] ) {
+						for( int c = 0; c < 8; c++ ) {
+							if( curbucket->childs[c]->sindices.size() > 0 )
+								bucketcol( pboxes, curbucket->childs[c], idx1, colz );
+						}
+					}
+
 				} // for( int cb1 = 0...
 
+
 			} // for( int sn = 0...
-			
+		printf("%d\n", colz);	
 
 			// Do collision/reaction for every box.
 		//	for( int b = 0; b < _numboxes; b++ ) {
