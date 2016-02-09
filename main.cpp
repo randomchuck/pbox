@@ -132,7 +132,10 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 
 		if( GetAsyncKeyState(VK_SPACE) & 0x8000 ) {
 			for( int bx = 0; bx < numboxes - 1; bx++ ) {
-				pboxes[bx] = PBox( vpos + vec3((bx % 2) * 0.5f,  1 + bx * 1.25f, 0), vsize, vscal, vrota, vang, true );
+				pboxes[bx].pos = vpos + vec3((bx % 2) * 0.5f,  1 + bx * 1.25f, 0);
+				pboxes[bx].raxis = vrota;
+				pboxes[bx].rangle = vang;
+				// PBox( vpos + vec3((bx % 2) * 0.5f,  1 + bx * 1.25f, 0), vsize, vscal, vrota, vang, true );
 				pboxes[bx].setvel( vec3(0, -0.01f, 0) );
 			}
 		}

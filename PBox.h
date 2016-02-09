@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // PBox - Physics Box.
-// 
+//
 // PBox is a simple, self contained, dynamic 3D cube.
 
 // * Can be just a 3D object/box in space.
@@ -10,13 +10,13 @@
 // * Has collision detection with other PBoxes built into the class.
 // - This works with a simple check first, then proper line to face checks.
 // - Returns a list of points on the CALLING box that are hitting something.
-// 
+//
 // * Dynamics/reactions/physics are also a feature.
 // - Can apply velocities and accelerations.
 // - Random forces.
 // - Reactions to collisions.
 // -- Utilizes collision points, rotation angles, and applies other forces.
-// 
+//
 // Usage:
 // PBox pboxes[10];
 // for( int bx = 0; bx < 10; bx++ )
@@ -67,11 +67,11 @@ class PBox {
 		vec3 vel;
 		// Rate at which the velocity changes.
 		vec3 accel;
-		// Specifies whether this box moves, or 
+		// Specifies whether this box moves, or
 		// can be moved.
 		bool dynamic;
 
-		// These helper variables keep us from creating 
+		// These helper variables keep us from creating
 		// objects every frame. Improves performance.
 
 		// Line in triangle result.
@@ -83,7 +83,7 @@ class PBox {
 		// Improves performance.
 		float largestaxis;
 
-		// We apply this rotation to the box if it isn't colliding with 
+		// We apply this rotation to the box if it isn't colliding with
 		// anything. Mimics angular momentum.
 		vec3 lastrotaxis;
 		float lastrotangle;
@@ -150,10 +150,10 @@ class PBox {
 		bool getdynamic( void) { return dynamic; }
 
 		/////////////////////////////////////////////////////////////////////////////
-		// Stores position/scale/rotation, rebuilds box transform, and 
-		// applies it to the points. Use when you want to update position, 
+		// Stores position/scale/rotation, rebuilds box transform, and
+		// applies it to the points. Use when you want to update position,
 		// scale, and rotation in one call.
-		// 
+		//
 		// A little note on const vec3 &. By putting const in front of our reference,
 		// it allows us to do this -> setTransform(vec3(1, 1, 1)... Wouldn't be able to use
 		// a temp vec3 without it.
@@ -266,26 +266,26 @@ class PBox {
 
 			// Initialize collision info first.
 			_pc.numcolpnts = 0;
-			
+
 			//////////////////
 			// Distance Check.
-			
-				// Before doing ANYTHING, do a simple distance check 
+
+				// Before doing ANYTHING, do a simple distance check
 				// to be sure the two boxes are even close enough.
-				
+
 				// Get distance between two boxes.
-				float dist = sqrt( (box2.pos.x - pos.x) * (box2.pos.x - pos.x) + 
-					   			   (box2.pos.y - pos.y) * (box2.pos.y - pos.y) + 
+				float dist = sqrt( (box2.pos.x - pos.x) * (box2.pos.x - pos.x) +
+					   			   (box2.pos.y - pos.y) * (box2.pos.y - pos.y) +
 								   (box2.pos.z - pos.z) * (box2.pos.z - pos.z)	);
-				
-				// If distance is less than sum of max axis', 
+
+				// If distance is less than sum of max axis',
 				// we have a potential collision.
 				if( dist > (largestaxis + box2.largestaxis) )
 					return;
 
 			// Distance Check.
 			//////////////////
-			
+
 			///////////////////////////////
 			// 12 lines, 2 collision points.
 			vec3 box1cps[12][2];
@@ -314,7 +314,7 @@ class PBox {
 			generatefacenormals( box2faces, box2fnormals );
 			///////////////////////////////
 			// Loop through all 12 lines and check for collisions.
-			// Each line can have a max of 2 collisions, because it's 
+			// Each line can have a max of 2 collisions, because it's
 			// impossible for there to be more.
 			for(int l = 0; l < 12; l++ ) {
 				// Initialize the contact/collision points.
@@ -324,7 +324,7 @@ class PBox {
 				box2cps[l][1] = BADVECTOR;
 				int numbox1cols = 0;
 				int numbox2cols = 0;
-				// Check every face. If a line collides with two faces, 
+				// Check every face. If a line collides with two faces,
 				// stop checking for that line.
 				for( int f = 0; f < 6; f++ ) {
 					box1cps[l][numbox1cols] = lineinface( box1lines[l], box2faces[f] );
@@ -352,13 +352,13 @@ class PBox {
 			// Cross and normalize to get a normal.
 			return normalize( cross( tv2, tv1 ) );
 		}
-		
+
 		/////////////////////////////////////////////////////////////////////////////
 		// Takes 6 faces and returns all of their normals.
 		void generatefacenormals( const vec3 _faces[6][4], vec3 _normals[6] ) {
 			// Create a normal for every face.
 			for( int f = 0; f < 6; f++ ) {
-				// Pull face vertices and create vectors. 
+				// Pull face vertices and create vectors.
 				vec3 fv1 = (vec3)_faces[f][0] - (vec3)_faces[f][1];
 				vec3 fv2 = (vec3)_faces[f][2] - (vec3)_faces[f][1];
 				// Cross and normalize to get a normal.
@@ -366,7 +366,7 @@ class PBox {
 				_normals[f] = normalize( _normals[f] );
 			}
 		}
-		
+
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Accepts 8 points(xyz) for a cube and outputs 4 values per face.
@@ -401,7 +401,7 @@ class PBox {
 			_faces[5][1] = _pnts[0];
 			_faces[5][2] = _pnts[3];
 			_faces[5][3] = _pnts[4];
-			
+
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -415,13 +415,13 @@ class PBox {
 				_lines[l2][0] = _pnts[p2];
 				_lines[l2][1] = _pnts[p2 + 5];
 			}
-			// 
+			//
 			_lines[10][0] = _pnts[0];
 			_lines[10][1] = _pnts[3];
-			// 
+			//
 			_lines[11][0] = _pnts[7];
 			_lines[11][1] = _pnts[4];
-			
+
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -455,23 +455,23 @@ class PBox {
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Returns a point if a there is a collision between
-		// line and triangle. Otherwise returns 
-		// vec3(-1000.0f, -1000.0f, -1000.0f). Check with 
+		// line and triangle. Otherwise returns
+		// vec3(-1000.0f, -1000.0f, -1000.0f). Check with
 		// ispntvalid(vec3()).
 		vec3 lineintri( const vec3 _line[2], const vec3 _tri[3] ) {
-			
+
 			// Get normal of triangle.
 			vec3 trinorm = gettrinormal( _tri );
 
 			// The line's normal/vector.
 			vec3 linenorm = (vec3)_line[1] - (vec3)_line[0];
-			
+
 			// Save length of line vector/normal.
 			float linelen = magnitude( linenorm );
 
 			// Now normalize. it.
 			linenorm = normalize( linenorm );
-			
+
 			// Dot between start of line and triangle normal.
 			float dot_start_offset = dot( _line[0], trinorm );
 
@@ -483,24 +483,24 @@ class PBox {
 
 			// How much to scale the line vector.
 			float linescale = ( dot_plane_offset - dot_start_offset ) / ( dot_lnnorm_trinorm ? dot_lnnorm_trinorm : 1 );
-			// float linescale = ( dot_plane_offset - dot_start_offset ) / dot_lnnorm_trinorm; 
-			
-			// If the line scale is less than 0 or greater than 
-			// the length of the line, there is no way it's 
+			// float linescale = ( dot_plane_offset - dot_start_offset ) / dot_lnnorm_trinorm;
+
+			// If the line scale is less than 0 or greater than
+			// the length of the line, there is no way it's
 			// touching the triangle.
 			if( linescale < 0 || linescale > linelen )
 				return BADVECTOR;
-			
+
 			// Scale line normal.
 			linenorm = linenorm * linescale;
-			
+
 			// Add scaled normal to line start.
 			vec3 checkpoint = (vec3)_line[0] + linenorm;
 
 			// If this point is in the triangle, return it.
 			if( pointintri(checkpoint, _tri) )
 				return checkpoint;
-			
+
 			// If we made it here, the line is NOT colliding with the triangle.
 			return BADVECTOR;
 		}
@@ -521,12 +521,12 @@ class PBox {
 			v1 = normalize( v1 );
 			v2 = normalize( v2 );
 			v3 = normalize( v3 );
-			
+
 			// Add up angles between vectors.
 			degs += acos( dot(v1, v2) );
 			degs += acos( dot(v2, v3) );
 			degs += acos( dot(v3, v1) );
-			
+
 			// If the sum of the angles is 2 * PI, the point is in the triangle.
 			if( fabs(degs - 2 * 3.141592654) < 0.005f )
 				return true;
@@ -543,9 +543,9 @@ class PBox {
 					 (_pnt.y != -1000.0f) &&
 					 (_pnt.y != -1000.0f) ) ? true : false;
 		}
-		
+
 		/////////////////////////////////////////////////////////////////////////////
-		// 
+		//
 		// Creates a quaternion from an axis-angle.
 		// Make sure axis is normalized.
 		// Takes vec3 and degrees.
@@ -557,7 +557,7 @@ class PBox {
 						 cos(_angle / 2) );			  // qw
 		}
 		/////////////////////////////////////////////////////////////////////////////
-		// 
+		//
 		// Takes a "quaternion" and returns axis-angle.
 		// Our _quat is just a vec3
 		// Returns axis and angle(in degrees).
@@ -589,7 +589,7 @@ class PBox {
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
-		// 
+		//
 		// Multiply Axis-Angle
 		// xyz w=angle in degrees.
 		// The order a1/2 are passed is important.
@@ -601,14 +601,14 @@ class PBox {
 			mat4 a1mat = rotate( fa1, a1 );
 			mat4 a2mat = rotate( fa2, a2 );
 			mat4 cmmat = a1mat * a2mat;
-			
+
 			// Convert back to axis angle.
 
 			// Clamp this angle value before passing to acos. Will get NaN otherwise.
 			float acosval = (cmmat[0][0] + cmmat[1][1] + cmmat[2][2] - 1) / 2;
 			acosval = acosval > -1 ? acosval : -0.999f;
 			acosval = acosval < 1 ? acosval : 0.999;
-			
+
 			// Calc angle.
 			float newangle = acos( acosval );
 			// Calc square root and clamp.
@@ -616,7 +616,7 @@ class PBox {
 							  (cmmat[0][2] - cmmat[2][0]) * (cmmat[0][2] - cmmat[2][0]) +
 							  (cmmat[1][0] - cmmat[0][1]) * (cmmat[1][0] - cmmat[0][1]) );
 			if( fabs(sqr) < 0.001f ) sqr = 1.0f;
-			
+
 			// Store axis values and angle.
 			vec3 newraxis;
 			newraxis.x = ( cmmat[2][1] - cmmat[1][2] ) / sqr;
@@ -645,7 +645,7 @@ class PBox {
 			// Get angle between contact point vector and
 			// velocity vector.
 			float vangle = acos( dot(contactvector, normalize(vel)) );
-	
+
 			// Prepare vectors for multaa().
 			rotvector.w = ((vangle * -0.05f) * 180.0f) / 3.141592f;
 			vec3 tmpraxis = raxis;
@@ -663,7 +663,7 @@ class PBox {
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
-		// If the box has rotated previously, this will apply that last rotation 
+		// If the box has rotated previously, this will apply that last rotation
 		// again. Used to simulate angular momentum.
 		void applylastrot( void ) {
 			if( lastrotangle ) {
@@ -681,7 +681,7 @@ class PBox {
 			}
 		}
 
-		// 
+		//
 		static void bucketcol( PBox *pboxes, Spocket *snode, int sidx, int &colz ) {
 			int numindices = snode->numsindices;
 			for( int s = 0; s < numindices; s++ ) {
@@ -723,29 +723,22 @@ class PBox {
 		} // bucketcol()
 
 		/////////////////////////////////////////////////////////////////////////////
-		// 
+		//
 		// Updates all box's velocities, positions, etc.
 		// Bonus! It will also handle collisions for you.
-		// Note: Call every iteration and you MUST pass a box and 
-		// a number. 
+		// Note: Call every iteration and you MUST pass a box and
+		// a number.
 		// Another Note: DOESN'T CHECK POINTER OR NUMBOXES!
 		// If you have 10 boxes you better use _numboxes = 10.
-		// Example 1: 
+		// Example 1:
 		// PBox boxes[2];
 		// PBox::update( boxes, 2 );
-		// 
+		//
 		// Example 2:
 		// PBox box( vec3(0, 0, 0) );
 		// PBox::update( &box, 1 );
-		// 
+		//
 		static void update( PBox *pboxes, int _numboxes ) {
-
-			// Create the octree if it doesn't exist.
-			if( sptree.numnodes == 0 ) {
-				for( int sidx = 0; sidx < _numboxes; sidx++ )
-					sptree.addsphere( pboxes[sidx].pos, pboxes[sidx].largestaxis );
-				sptree.buildtree( 5, vec3(150, 150, 150), vec3(10.0f, 0.0f, 10.0f) );
-			}
 
 			// Update every box's vel/pos/etc.
 			for( int pb = 0; pb < _numboxes; pb++ ) {
@@ -754,31 +747,37 @@ class PBox {
 				// Update position.
 				pboxes[pb].setpos( pboxes[pb].pos + pboxes[pb].vel );
 				// Add this box/sphere to the octree.
-				// sptree.addsphere( pboxes[pb].pos, pboxes[pb].largestaxis );
+				if( sptree.numnodes == 0 )
+                    sptree.addsphere( pboxes[pb].pos, pboxes[pb].largestaxis );
+                else
+                    sptree.refreshsphere( pb, pboxes[pb].pos );
 			}
+
 			// Build octree.
-			int stime = GetTickCount();
+            if( sptree.numnodes == 0 ) {
+                sptree.buildtree( 5, vec3(150, 150, 150), vec3(10.0f, 0.0f, 10.0f) );
+            }
 
-
-			// std::vector<Spocket *> *shortlist = sptree.buildtree( 4, vec3(150, 150, 150), vec3(10.0f, 0.0f, 10.0f) );
-
-			// int etime = GetTickCount();
-			
-			// printf("Init Tree - %d\n", etime - stime);
-
-			int colz = 0;
-
-			// 
+			// Grab every box, look in its octree bucket and do
+			// collisions.
 			for( int pb = 0; pb < _numboxes; pb++ ) {
-				Spocket *bucket = sptree.getbucket( pb );
+                // Grab bucket this box could be in.
+                Spocket *bucket = sptree.getbucket( pb );
+                int bucketid = bucket->id;
+                // The number if box indices this bucket has.
 				int numsidx = bucket->numsindices;
+
+                // Do collision check between this box and the bucket
 				for( int cidx = 0; cidx < numsidx; cidx++ ) {
+                    // Grab second box index.
 					int idx2 = bucket->sindices[cidx];
+                    // If this index is the current box, don't check
+                    // against itself.
 					if( pb == idx2 ) continue;
 
 					// Finally do collision check.
 					pboxes[pb].collision( pboxes[pb].pc, pboxes[idx2] );
-					colz++;
+
 					// React to the collision.
 					if( pboxes[pb].pc.numcolpnts > 0 ) {
 						// Fix penetration and react for box 1.
@@ -790,7 +789,6 @@ class PBox {
 						// Check for bumps, fix penetration, and react.
 						if( pboxes[idx2].dynamic ) {
 							pboxes[idx2].collision( pboxes[idx2].pc, pboxes[pb] );
-							colz++;
 							if( pboxes[idx2].pc.numcolpnts > 0 ) {
 								pboxes[idx2].fixpenetration( pboxes[idx2].pc );
 								pboxes[idx2].reaction( pboxes[idx2].pc );
@@ -803,48 +801,7 @@ class PBox {
 
 			} // for( int pb...
 
-			int etime = GetTickCount();
-
-			printf("Loop Tree - %d\n", etime - stime);
-
-			// printf("%d\n", colz);	
-
-			// Do collision/reaction for every box.
-		//	for( int b = 0; b < _numboxes; b++ ) {
-
-		//		for( int c = b; c < _numboxes - 1; c++ ) {
-		//			// Check for a collision.
-		//			pboxes[b].collision( pboxes[b].pc, pboxes[c + 1] );
-		//			// React to this collision.
-		//			if( pboxes[b].pc.numcolpnts > 0 ) {
-		//				// Fix penetration and react for box 1. 
-		//				if( pboxes[b].dynamic ) {
-		//					pboxes[b].fixpenetration( pboxes[b].pc );
-		//					pboxes[b].reaction( pboxes[b].pc );
-		//				}
-		//				// Grab collision info for second box.
-		//				if( pboxes[c + 1].dynamic ) {
-		//					pboxes[c + 1].collision( pboxes[c + 1].pc, pboxes[b] );
-		//					if( pboxes[c + 1].pc.numcolpnts > 0 ) {
-		//						pboxes[c + 1].fixpenetration( pboxes[c + 1].pc );
-		//						pboxes[c + 1].reaction( pboxes[c + 1].pc );
-		//					}
-		//					else {
-		//						// pboxes[c + 1].applylastrot();
-		//					}
-		//				}
-
-		//			} // if( pc.numcolpnts...
-		//			else {
-		//				// pboxes[b].applylastrot();
-		//			}
-
-		//		} // for( int c...
-
-		//	} // for( int b...
-
-			// Clear tree. We're going to rebuild it every frame.
-			// sptree.clear();
+            sptree.reset();
 
 		} // update()
 };

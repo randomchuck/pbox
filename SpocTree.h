@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // Oct Tree + Sphere.
-// 
+//
 // Creates an octree for collision detection.
-// Accepts position and radius of sphere, but internally creates 
+// Accepts position and radius of sphere, but internally creates
 // "bounding boxes."
 
 // Lists of things.
@@ -17,21 +17,21 @@
 // position
 // radius
 // poslm and neglm are positive and negative limits.
-// We calc them by position.x/y/z +/- radius. Should help us 
+// We calc them by position.x/y/z +/- radius. Should help us
 // avoid doing +/- when checking for collisions.
 struct Sfear {
 	vec3 pos;
 	float rad;
-	vec3 poslm;
-	vec3 neglm;
+	// vec3 poslm;
+	// vec3 neglm;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // A SpocTree Bucket.
 // Has 8 Spocket children or can be a leaf node.
-// Spockets will also contain a list of 
+// Spockets will also contain a list of
 // indices to Sfear's.
-// Similar to Sfears, it has an upper and lower 
+// Similar to Sfears, it has an upper and lower
 // limit in world coordinates.
 struct Spocket {
 	// Unique Identifier...
@@ -44,15 +44,15 @@ struct Spocket {
 	int numsindices;
 	// Children of this object.
 	// If looking down at the volume(-Y), children order is clockwise:
-	// childs[0] = UpperLeft/HighY, childs[1] = UpperRight/HighY, 
+	// childs[0] = UpperLeft/HighY, childs[1] = UpperRight/HighY,
 	// childs[2] = LowerLeft/HighY, childs[3] = LowerRight/HighY,
-	// childs[4] = UpperLeft/LowY, childs[5] = UpperRight/LowY, 
+	// childs[4] = UpperLeft/LowY, childs[5] = UpperRight/LowY,
 	// childs[6] = LowerLeft/LowY, childs[7] = LowerRight/LowY
 	Spocket *childs[8];
 	// Parent node.
 	// 0 if root.
 	Spocket *parent;
-	
+
 	// Initializes Spocket.
 	Spocket() {
 		id = -1;
@@ -68,11 +68,11 @@ struct Spocket {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Sphere/Octree.
-// 
+//
 // Feed it a list of spheres and it generates an octree for you.
-// If you match the sphere list with your objects array, you can 
+// If you match the sphere list with your objects array, you can
 // just use indices to find specific spheres.
-// 
+//
 class SpocTree {
 	public:
 
@@ -83,9 +83,9 @@ class SpocTree {
 		std::list <Spocket> bucketlist;
 
 		// List of buckets that contain indices.
-		// By creating a smaller list, we're reducing the number of buckets we 
-		// have to check. Granted, you could just iterate through all buckets 
-		// to see if indices were added, but that could potentially be thousands of 
+		// By creating a smaller list, we're reducing the number of buckets we
+		// have to check. Granted, you could just iterate through all buckets
+		// to see if indices were added, but that could potentially be thousands of
 		// checks.
 		std::vector <Spocket *> shortlist;
 
@@ -98,44 +98,53 @@ class SpocTree {
 		///////////////////////////////////////////////////////////////////////
 		// Def Destructor.
 		~SpocTree() { clear(); }
-	
+
+        ///////////////////////////////////////////////////////////////////////
+        // Create a sphere from a position and radius.
+        //
+        // Note: We're passing a sphere because creating a new one and returning
+        // it cost a lot of cycles.
+        void buildsphere( Sfear &sf, const vec3 &_pos, float _radius ) {
+            sf.pos = _pos;
+			sf.rad = _radius;
+        }
+
 		///////////////////////////////////////////////////////////////////////
 		// Add a sphere to the list.
 		// _pos - position.
 		// _radius...
 		void addsphere( const vec3 &_pos, float _radius ) {
 			Sfear nsfw;
-			nsfw.pos = _pos;
-			nsfw.rad = _radius;
-			vec3 poslm = nsfw.pos + vec3( _radius, _radius, _radius );
-			vec3 neglm = nsfw.pos - vec3( _radius, _radius, _radius );
+			buildsphere( nsfw, _pos, _radius );
+			//vec3 poslm = nsfw.pos + vec3( _radius, _radius, _radius );
+			//vec3 neglm = nsfw.pos - vec3( _radius, _radius, _radius );
 			slist.push_back( nsfw );
 		}
 
 		///////////////////////////////////////////////////////////////////////
 		// After addsphere()-ing a bunch of spheres, call buildtree()
-		// to create the octree. You should only need to call this once during 
+		// to create the octree. You should only need to call this once during
 		// initialization.
-		// 
+		//
 		// _depth determines how many times we split up the tree.
 		// Can improve/degrade performance.
 		// A depth of 1 is default and will produce the root and 8 children.
-		// Depth of 0 will just have the root, which is just a big bounding 
+		// Depth of 0 will just have the root, which is just a big bounding
 		// box containing all Sfears.
-		// 
+		//
 		// _size is the size of the octree volume. values must be positive.
 		// Can improve/degrade performance.
-		// 
+		//
 		// _pos is the position/offset of the tree in world coordinates.
-		// You can use it to offset the nodes so Sfears register in fewer 
+		// You can use it to offset the nodes so Sfears register in fewer
 		// buckets.
 		// Helps scenarios where objects are axis aligned.
 		// Can improve/degrade performance.
-		// 
-		// Return - A pointer to a list(vector) containing nodes that 
+		//
+		// Return - A pointer to a list(vector) containing nodes that
 		// have sphere indices.
-		std::vector<Spocket *> *buildtree( const int _depth = 1, 
-										   const vec3 &_size = vec3(100, 100, 100),  
+		std::vector<Spocket *> *buildtree( const int _depth = 1,
+										   const vec3 &_size = vec3(100, 100, 100),
 										   const vec3 &_pos = vec3(0, 0, 0) ) {
 			// This octree implementation can't use negative numbers.
 			if( _depth < 0 ) return 0;
@@ -171,22 +180,22 @@ class SpocTree {
 				// Add root to list.
 				bucketlist.push_back( sproot );
 				numnodes = 1;
-				// Update shortlist. Even with 1 node, the user 
+				// Update shortlist. Even with 1 node, the user
 				// will still need it.
 				shortlist.push_back( &*bucketlist.begin() );
-				// Give 'em the short list so they can check 
+				// Give 'em the short list so they can check
 				// for collisions already.
 				return &shortlist;
 			}
-		
-			// Depth is 1 or greater. We will continue to add 
+
+			// Depth is 1 or greater. We will continue to add
 			// children until we hit the max depth.
 			// Max number of nodes we create + root.
 			const int maxnodes = pow( 8, _depth ) + 1;
 			// The number of nodes we've created so far.
 			// About to add root.
 			numnodes = 1;
-			// This is used to track parent nodes for 
+			// This is used to track parent nodes for
 			// children.
 			Spocket *sp = 0;
 			// Add root to list.
@@ -197,7 +206,7 @@ class SpocTree {
 
 			// Loop until we've created enough nodes.
 			while( numnodes < maxnodes ) {
-				
+
 				// Point to current parent.
 				sp = &*buckit;
 
@@ -205,7 +214,7 @@ class SpocTree {
 				for( int c = 0; c < 8; c++ ) {
 					// Child node length.
 					vec3 clen = ((sp->poslm - sp->neglm) / 2);
-					// Parent origin. Later calculated to 
+					// Parent origin. Later calculated to
 					// child origin.
 					vec3 opos = sp->neglm + clen;
 					// Axis lengths.
@@ -244,23 +253,23 @@ class SpocTree {
 			return &shortlist;
 
 		} // buildtree()
-		
+
 		///////////////////////////////////////////////////////////////////////
 		// Takes a vector3 which contains a sphere's position and radius.
 		// vec3( p.x, p.y, p.z, radius ).
-		// Also accepts box bounds -> 
+		// Also accepts box bounds ->
 		// _box[0] = positive point. _box[1] = negative point.
-		// 
-		// Now it doesn't work quite like you would think. It creates a 
-		// bounding box for the sphere using the pos and radius. It then 
-		// checks every point from that gen'd box and tests if contained 
-		// within _box. If all of those points are within _box, this returns 
+		//
+		// Now it doesn't work quite like you would think. It creates a
+		// bounding box for the sphere using the pos and radius. It then
+		// checks every point from that gen'd box and tests if contained
+		// within _box. If all of those points are within _box, this returns
 		// true.
 		bool sphereboxinbox( const vec3 &s, const vec3 _box[2] ) {
-		
+
 			// Pull out pos and radius.
 			vec3 ps = s;
-			float rd = s.w;	
+			float rd = s.w;
 
 			// Front Face.
 			// Low x, Low y, Low z(close to cam)
@@ -294,16 +303,16 @@ class SpocTree {
 		} // sphereboxinbox()
 
 		///////////////////////////////////////////////////////////////////////
-		// Pass a vec3 and a vec3[2]. Expects _box[0] to be poslm - 
+		// Pass a vec3 and a vec3[2]. Expects _box[0] to be poslm -
 		// ie, positive limit of box, and _box[1] to be negative.
 		// Returns true if _pnt is within this box.
 		bool pntinbox( const vec3 &_pnt, const vec3 _box[2] ) {
-			
+
 			// X
 			if( _pnt.x > _box[0].x || _pnt.x < _box[1].x )
 				return false;
 			// Y
-			if( _pnt.y > _box[0].y || _pnt.y < _box[1].y ) 
+			if( _pnt.y > _box[0].y || _pnt.y < _box[1].y )
 				return false;
 			// Z
 			if( _pnt.z > _box[0].z || _pnt.z < _box[1].z )
@@ -314,7 +323,7 @@ class SpocTree {
 		} // pntinbox()
 
 		///////////////////////////////////////////////////////////////////////
-		// Add a bucket pointer to the shortlist. Prevents for duplicates.
+		// Add a bucket pointer to the shortlist. Prevents duplicates.
 		void addtoshortlist( Spocket *_node ) {
 			// Make sure it's not already in there.
 			int sz = shortlist.size();
@@ -326,17 +335,30 @@ class SpocTree {
 			shortlist.push_back( _node );
 		}
 
+        ///////////////////////////////////////////////////////////////////////
+        // Builds sphere and box from given Spocket and sphere index.
+        // _node - Spocket pointer.
+        // _sidx - Index into sphere list.
+        // sph - Pointer to a vec3.
+        // box - pointer to an ARRAY[2] of vec3's.
+        void buildspherebox( Spocket *_node, int _sidx, vec3 *sph, vec3 *box ) {
+            // Grab sphere position and radius.
+			(*sph) = vec3( slist[_sidx].pos );
+			(*sph).w = slist[_sidx].rad;
+			// Build node's box.
+			box[0] = _node->poslm;
+			box[1] = _node->neglm;
+        }
+
 		///////////////////////////////////////////////////////////////////////
-		// Recursively adds a sphere index to one of the octree 
+		// Recursively adds a sphere index to one of the octree
 		// nodes.
 		bool _addsphere( Spocket *_node, int _sidx ) {
-			// Grab sphere position and radius.
-			vec3 spheer = vec3( slist[_sidx].pos );
-			spheer.w = slist[_sidx].rad;
-			// Build second box. Sphere might be in it.
+			// Get the sphere and Spocket bounds.
+			vec3 spheer;
 			vec3 bx[2];
-			bx[0] = _node->poslm;
-			bx[1] = _node->neglm;
+			buildspherebox(_node, _sidx, &spheer, bx);
+
 			// Is the sphere within this box?
 			if( sphereboxinbox(spheer, bx) ) {
 				// The sphere may be in one of its children, too.
@@ -347,7 +369,7 @@ class SpocTree {
 						}
 					}
 				}
-				// If none of the children(if they existed) could house our 
+				// If none of the children(if they existed) could house our
 				// sphere, we'll keep it.
 				_node->sindices.push_back( _sidx );
 				_node->numsindices = _node->sindices.size();
@@ -358,7 +380,7 @@ class SpocTree {
 				// Sphere placed. Success.
 				return true;
 			}
-			// Neither this node nor its children could hold this 
+			// Neither this node nor its children could hold this
 			// sphere.
 			return false;
 		}
@@ -376,27 +398,60 @@ class SpocTree {
 			}
 		}
 
-
 		///////////////////////////////////////////////////////////////////////
 		// Give an index to a sphere, this will return the bucket it's in.
-		Spocket *getbucket( int _sidx ) {
-			// Use the short list. This will contain a list of buckets that 
-			// actually contain nodes. Better than asking every node if they 
-			// have indices.
-			int numbuckets = shortlist.size();
-			for( int bkt = 0; bkt < numbuckets; bkt++ ) {
-				// Does this bucket contain our index?
-				int numidx = shortlist[bkt]->numsindices;
-				for( int curi = 0; curi < numidx; curi++ ) {
-					if( shortlist[bkt]->sindices[curi] == _sidx )
-						return &*shortlist[bkt];
-				}
+		Spocket *getbucket( int _sidx, Spocket *_node = 0) {
+
+            // If this is the first call, start with root.
+            if( _node == 0 ) {
+                _node = &*bucketlist.begin();
+            }
+
+		    // Get the sphere and Spocket bounds.
+			vec3 spheer;
+			vec3 bx[2];
+			buildspherebox(_node, _sidx, &spheer, bx);
+
+			// Is the sphere within this box?
+			if( sphereboxinbox(spheer, bx) ) {
+                if( _node->childs[0] ) {
+                    for( int c = 0; c < 8; c++ ) {
+                        if( getbucket(_sidx, _node->childs[c]) )
+                           return _node->childs[c];
+                    }
+                }
+
+                // If none of the children could hold this, then the
+                // parent must have it.
+                return _node;
 			}
-			// Getting here means NO buckets in the short list contained 
-			// the given index. Either the index was out of range, or 
-			// that object isn't in the bounds of the octree.
+
+			// Current node doesn't contain given sphere.
 			return 0;
 		}
+
+        ///////////////////////////////////////////////////////////////////////
+        // Not only does it clear the short list, it also
+        // removes indices from the buckets it was pointing too.
+        // Handy when you need to remove indices only from the buckets
+        // that were used.
+        void clearshortlist(  ) {
+            // Clear the short list.
+            int ssize = shortlist.size();
+            for( int sh = 0; sh < ssize; sh++ )
+                shortlist[sh]->sindices.clear();
+            shortlist.clear();
+        }
+
+        //
+        void refreshsphere( int sidx, vec3 &pos ) {
+            slist[sidx].pos = pos;
+            _addsphere( &*bucketlist.begin(), sidx );
+        }
+
+        void reset( void ) {
+            clearshortlist();
+        }
 
 		///////////////////////////////////////////////////////////////////////
 		// Cleans up lists/memory.
