@@ -41,6 +41,7 @@ struct Spocket {
 	vec3 neglm;
 	// Indices into sphere list.
 	std::vector <int> sindices;
+	int numsindices;
 	// Children of this object.
 	// If looking down at the volume(-Y), children order is clockwise:
 	// childs[0] = UpperLeft/HighY, childs[1] = UpperRight/HighY, 
@@ -58,6 +59,7 @@ struct Spocket {
 		poslm = vec3( 0, 0, 0 );
 		neglm = poslm;
 		sindices.clear();
+		numsindices = 0;
 		for( int c = 0; c < 8; c++ )
 			childs[c] = 0;
 		parent = 0;
@@ -165,6 +167,7 @@ class SpocTree {
 				// Add indices.
 				for( unsigned int s = 0; s < slist.size(); s++ )
 					sproot.sindices.push_back( s );
+				sproot.numsindices = sproot.sindices.size();
 				// Add root to list.
 				bucketlist.push_back( sproot );
 				numnodes = 1;
@@ -347,6 +350,7 @@ class SpocTree {
 				// If none of the children(if they existed) could house our 
 				// sphere, we'll keep it.
 				_node->sindices.push_back( _sidx );
+				_node->numsindices = _node->sindices.size();
 
 				// Add this node to the short list.
 				addtoshortlist( _node );
@@ -370,6 +374,28 @@ class SpocTree {
 			for( unsigned int sidx = 0; sidx < slist.size(); sidx++ ) {
 					_addsphere( sproot, sidx );
 			}
+		}
+
+
+		///////////////////////////////////////////////////////////////////////
+		// Give an index to a sphere, this will return the bucket it's in.
+		Spocket *getbucket( int _sidx ) {
+			// Use the short list. This will contain a list of buckets that 
+			// actually contain nodes. Better than asking every node if they 
+			// have indices.
+			int numbuckets = shortlist.size();
+			for( int bkt = 0; bkt < numbuckets; bkt++ ) {
+				// Does this bucket contain our index?
+				int numidx = shortlist[bkt]->numsindices;
+				for( int curi = 0; curi < numidx; curi++ ) {
+					if( shortlist[bkt]->sindices[curi] == _sidx )
+						return &*shortlist[bkt];
+				}
+			}
+			// Getting here means NO buckets in the short list contained 
+			// the given index. Either the index was out of range, or 
+			// that object isn't in the bounds of the octree.
+			return 0;
 		}
 
 		///////////////////////////////////////////////////////////////////////

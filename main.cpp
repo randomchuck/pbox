@@ -185,7 +185,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
 		}
 
 		// Draw octree.
-		drawspoc();
+		// drawspoc();
 
 		// Render 3D.
 		boop.Blit();
